@@ -1,0 +1,249 @@
+ <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="security" uri="http://www.springframework.org/security/tags" %>
+    <%@ page isELIgnored="false" %>
+<jsp:include page="header.jsp" />
+
+
+
+            <!-- Container fluid  -->
+            <!-- ============================================================== -->
+            <div class="container-fluid user-top" data-ng-controller="categoryManagementController">
+                <!-- ============================================================== -->
+                <!-- Bread crumb and right sidebar toggle -->
+                <!-- ============================================================== -->
+                <div class="row page-titles">
+                    <div class="col-md-5 align-self-center">
+                        <h3 class="text-themecolor">CATEGORY</h3>
+                    </div>
+
+                    <div class="col-md-7 align-self-center">
+                   <security:authorize access="hasAuthority('OFFICE ADMINISTRATOR')"> 
+                        <ol class="breadcrumb">
+                           <a class="btn btn-primary waves-effect waves-light" href="" data-ng-click="newCategory()">Add Category</a>
+                        </ol>
+                         </security:authorize>
+                    </div>
+                </div>
+                <!-- ============================================================== -->
+                <!-- End Bread crumb and right sidebar toggle -->
+                <!-- ============================================================== -->
+                <!-- ============================================================== -->
+                <!-- Start Page Content -->
+                <!-- ============================================================== -->
+                <!-- Row -->
+		
+		
+		  <div data-ng-if="CategoryMgt">
+		
+		<div class="form_section">
+
+			<div class="form-content">
+				<h4 class="form_content_title">Search Category</h4>
+
+<div class="table-responsive">
+				<table datatable="ng" dt-options="dtOptions"
+					class="table table-striped table-bordered">
+					<thead>
+					<tr>
+						<th>Category Code</th>
+						<th>Category Type </th>
+						<th> Asset Tracking</th>
+						<th>Status </th>
+						<th class="not-export-col">Action</th>
+					</tr>
+					</thead>
+					<tbody>
+						<tr data-ng-repeat="categoryDto in categoryDtoList">
+							<td>{{categoryDto.categoryCode}}</td>
+							<td>{{categoryDto.categoryType}}</td>
+							<td>{{categoryDto.assetTracking}}</td>
+							<td>{{categoryDto.status}}</td>
+							<td>
+							<security:authorize access="hasAuthority('OFFICE ADMINISTRATOR')">
+							<a href="" data-ng-click="edit(categoryDto)" class="btn btn-primary"><i class="fa fa-edit"></i> Edit</a> 
+							</security:authorize>
+							<a href="" data-ng-click="view(categoryDto)" class="btn btn-primary"><i class="fa fa-drivers-license-o"></i> View</a>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+</div>				
+			</div>
+		
+			
+		</div>	
+            </div>
+
+           
+           
+              <!-- Row -->
+            <!-- ============================================================== -->        
+           
+           <div data-ng-show="addnewCategory==true">
+
+            					<div class="form_section">
+							<div class="form-content create_form">
+								<h4 class="form_content_title">Create New Category  </h4>
+								<form class="form-inline"  method="post" role="form" name="new_category" id="new_category" novalidate >
+									<div class="col-md-6 col_md text-center">
+										<div class="add_icon_asterisk">
+											<label for="email">Category Type:</label>
+											<input type="text" class="form-control" id="categoryType" name="categoryType" onlystring data-ng-model="categoryDto.categoryType" required="required" maxlength="50" tabindex="1" autocomplete="off">
+											<i class="fa fa-asterisk" ></i>
+										</div>
+										<div data-ng-show="new_category.$submitted || new_category.categoryType.$touched" class="error_msg">
+									<div data-ng-show="new_category.categoryType.$error.required" class="error_msg">Please Enter Category Type</div>
+									</div>	
+										<div class="add_icon_asterisk">
+											<label for="pwd">Category Code</label>
+											<input type="text" class="form-control" id="categoryCode" name="categoryCode" data-ng-model="categoryDto.categoryCode" required="required" maxlength="6" tabindex="2" autocomplete="off">
+											<i class="fa fa-asterisk" ></i>
+										</div>
+										
+										<div data-ng-show="new_category.$submitted || new_category.categoryCode.$touched" class="error_msg">
+									<div data-ng-show="new_category.categoryCode.$error.required" class="error_msg">Please Enter Category Type</div>
+									</div>	
+						
+									<div class="add_icon_asterisk">	
+									<label for="">Asset Tracking:</label>
+										<div class="new-radio-button-inline">
+										
+										<input type="radio" data-ng-model="categoryDto.assetTracking"  name="assetTracking" required class="with-gap"  id="QTY TRACKING" value="QTY TRACKING" tabindex="3" >
+										<label for="QTY TRACKING" >QTY TRACKING</label>
+										<input type="radio" data-ng-model="categoryDto.assetTracking"  name="assetTracking"  required class="with-gap"  id="INDIVIDUAL TRACKING" value="INDIVIDUAL TRACKING" tabindex="4">
+										<label for="INDIVIDUAL TRACKING">INDIVIDUAL TRACKING</label>
+									</div>
+									<i class="fa fa-asterisk" ></i>
+										</div>
+										
+										<div data-ng-show="new_category.$submitted || new_category.assetTracking.$touched" class="error_msg">
+									<div data-ng-show="new_category.assetTracking.$error.required" class="error_msg">Please Select Asset Tracking</div>
+									</div>
+									</div>
+										<div class="col-12 submit_col text-center">
+											<button class="btn btn-primary" data-ng-click="saveCategory()"><i class="fa fa-check"></i> SAVE</button>
+											<span class="btn btn-warning" data-ng-click="cancel()"><i class="fa fa-close"></i> CANCEL</span>
+										</div>
+								</form>
+							</div>
+					</div>
+            </div>
+            
+            
+           
+           
+           
+           
+           
+            <!-- Row -->
+            <!-- ============================================================== -->
+            
+            <div data-ng-show="editCategory==true">
+            
+            <div class="form_section">
+							<div class="form-content create_form">
+								<h4 class="form_content_title">Edit Category</h4>
+								<form class="form-inline"  method="post" role="form" name="editcategory" id ="editcategory"  novalidate >
+									<div class="col-md-6 col_md text-center">
+										<div class="add_icon_asterisk">
+											<label for="email">Category Type:</label> 
+											<input type="text" class="form-control" id="categoryType1" name="categoryType" onlystring data-ng-model="categoryDto.categoryType" maxlength="50" autocomplete="off" required="required" tabindex="1" >
+											<i class="fa fa-asterisk" ></i>
+											<input type="hidden" class="form-control" id="id" name="id" data-ng-model="categoryDto.id"  >
+										</div>
+										<div data-ng-show="editcategory.$submitted || editcategory.categoryType.$touched" class="error_msg">
+									<div data-ng-show="editcategory.categoryType.$error.required" class="error_msg">Please Enter Category Type</div>
+									</div>	
+										<div class="add_icon_asterisk">
+											<label for="pwd">Category Code:</label>
+											<input type="text" class="form-control" id="categoryCode1" name="categoryCode" data-ng-model="categoryDto.categoryCode"  maxlength="6" autocomplete="off" required="required" tabindex="2">
+											<i class="fa fa-asterisk" ></i>
+										</div>
+										<div data-ng-show="editcategory.$submitted || editcategory.categoryCode.$touched" class="error_msg">
+									<div data-ng-show="editcategory.categoryCode.$error.required" class="error_msg">Please Enter Category Type</div>
+									</div>
+									<div class="">
+												<label for="email">Asset Tracking :</label>
+												
+										<!-- <div class="add_icon_asterisk"> -->		
+									 <div class="new-radio-button-inline add_icon_asterisk">
+										<div class="add_icon_asterisk">
+										<input type="radio" data-ng-model="categoryDto.assetTracking"   name="assetTracking" required class="with-gap"  id="QTY TRACKING1" value="QTY TRACKING" tabindex="7" >
+										<label for="QTY TRACKING" >QTY TRACKING</label>
+										<input type="radio" data-ng-model="categoryDto.assetTracking"   name="assetTracking"  required class="with-gap"  id="INDIVIDUAL TRACKING1" value="INDIVIDUAL TRACKING" tabindex="8">
+										<label for="INDIVIDUAL TRACKING">INDIVIDUAL</label>
+									</div> 
+									<i class="fa fa-asterisk" ></i>	
+									</div>
+											<!-- </div> -->		
+												
+<%-- 												<input type="radio" data-ng-model="categoryDto.assetTracking" value="QTY" ng-init="categoryDto.assetTracking='${categoryDto.assetTracking}'">QTY --%>
+<%-- 												<input type="radio" data-ng-model="categoryDto.assetTracking" value="INDIVIDUAL" ng-init="categoryDto.assetTracking='${categoryDto.assetTracking}'" >INDIVIDUAL --%>
+											
+										<div class="">
+												<label for="email"> Status :</label>
+												
+									<div class="new-radio-button-inline add_icon_asterisk">
+										<div class="add_icon_asterisk">
+										<input type="radio" data-ng-model="categoryDto.status" name="status" required class="with-gap"  id="ACTIVE" value="ACTIVE" tabindex="9" >
+										<label for="ACTIVE" >ACTIVE</label>
+										<input type="radio" data-ng-model="categoryDto.status"  name="status"  required class="with-gap"  id="INACTIVE" value="INACTIVE" tabindex="10">
+										<label for="INACTIVE">INACTIVE</label>
+									</div>
+									<i class="fa fa-asterisk" ></i>	
+									</div>
+									
+											<div class="">
+												<!-- <label for="pwd">createdBy  :</label> -->
+												<input type="hidden" class="form-control" id="createdBy" name="createdBy" data-ng-model="categoryDto.createdBy" ng-init="categoryDto.createdBy='${categoryDto.createdBy}'">
+												<input type="hidden" class="form-control" id="creationDate" name="creationDate" data-ng-model="categoryDto.creationDate" ng-init="categoryDto.creationDate='${categoryDto.creationDate}'">
+											</div>
+											</div>
+											
+										
+										<div class="col-12 submit_col text-center">
+											<button class="btn btn-primary" data-ng-click="saveCategory()"><i class="fa fa-check"></i> SAVE</button>
+											<button class="btn btn-warning" data-ng-click="cancel()"><i class="fa fa-close"></i> CANCEL</button>
+										</div>
+										
+								</form>
+								</div>
+							</div>
+					</div>
+            
+  <!-- Row -->
+            <!-- ============================================================== -->
+
+
+			<!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Category Details</h4>
+        </div>
+        <div class="modal-body">
+        <table class="table table-bordered table-striped">
+         					<tr><th>Category Type </th><td>{{inventoryManagementDetailsDto.categoryType}}</td></tr>
+							<tr><th>Category Code</th><td>{{inventoryManagementDetailsDto.categoryCode}}</td></tr>
+							<tr><th>Asset Tracking</th><td>{{inventoryManagementDetailsDto.assetTracking}}</td></tr>
+							<tr><th>Status</th><td>{{inventoryManagementDetailsDto.status}}</td></tr>
+			</table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+			
+		</div>	
+           
+            
+            
+            
+            
+			<jsp:include page="footer.jsp" />
+			

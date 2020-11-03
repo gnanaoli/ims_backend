@@ -1,0 +1,34 @@
+ims.controller('InventoryCountController',
+		function($http, FetchService, $scope) {
+
+			$scope.inventoryManagementMaster = [];
+			$scope.TempMaster = [];
+
+			FetchService.getAllInventoryManagement().then(
+					function(response) {
+						$scope.TempMaster = response;
+
+						for (i = 0; i < $scope.TempMaster.length; i++) {
+
+							
+
+ if ($scope.inventoryManagementMaster.length == 0) {
+ $scope.inventoryManagementMaster.push($scope.TempMaster[i]);
+ }
+ else{
+var index = $scope.inventoryManagementMaster.map((o) => o.subCategory).indexOf($scope.TempMaster[i].subCategory);
+
+if(index != -1){
+	$scope.inventoryManagementMaster[index].availableQuantity  = $scope.inventoryManagementMaster[index].availableQuantity + $scope.TempMaster[i].availableQuantity;
+}
+else{
+	$scope.inventoryManagementMaster.push($scope.TempMaster[i]);
+}
+ }
+
+						}
+
+						// console.log("gfdgdfg" + JSON.stringify(response));
+					});
+
+		});

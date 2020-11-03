@@ -1,0 +1,252 @@
+.default-theme {
+    background: #36578c;
+}
+.teal {
+    background: #009688;
+}
+.bluegrey{
+	background: #607D8B;
+}
+.indigo{
+	background:#3F51B5;
+}
+.pink{
+	background:#b34c6f;
+}
+.fix-header .topbar {
+	border-bottom: 2px solid #b34c6f;
+}
+.fix-sidebar .left-sidebar {
+    background: #b34c6f;
+}
+.notify .heartbit {
+    border-color:#b34c6f;
+}
+.fix-sidebar .left-sidebar {
+    background: #b34c6f;
+}
+.footer {
+	background: #b34c6f;
+}
+.topbar .navbar-light .navbar-nav .nav-item>a.nav-link {
+	color: #b34c6f;
+}
+.topbar .navbar-light .navbar-nav .nav-item>a.nav-link i {
+	color: #b34c6f;
+}
+.top-header {
+	color: #b34c6f;
+}
+.header-name h3 {
+	color: #b34c6f;
+}
+.fix-sidebar .left-sidebar {
+    background: #b34c6f;
+}
+.mini-sidebar .sidebar-nav #sidebarnav>li:hover>a {
+	border-right-color:#b34c6f;
+}
+.mini-sidebar .sidebar-nav ul li ul li:hover {
+	border-right-color:#b34c6f;
+}
+.text-themecolor {
+	color: #b34c6f !important;
+}
+.mini-sidebar .sidebar-nav #sidebarnav>li>ul {
+	background: #b34c6f;
+}
+.sidebar-nav ul li ul li a {
+    background: #88385b6b;
+}
+.sidebar-nav ul li a:hover {
+    border-right-color: #b34c6f !important;
+}
+/* .select2-results__option[aria-selected] {
+	color: #b34c6f;
+} */
+.tooltip.bs-tooltip-left .arrow:before {
+	border-left-color: #b34c6f !important;
+  }
+   .form_section .three_column_form h3 {
+    color: #b34c6f;
+}
+.select-items div,.select-selected {
+	color: #b34c6f;
+  }
+  .search_section .search_heading span{
+	color: #b34c6f;
+}
+.search_section .search_btn {
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#ef7ca5), to(#b34c6f));
+}
+.search_section .search_btn:hover {
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#b34c6f), to(#ef7ca5));
+}
+.search_section .search_heading span{
+	color: #b34c6f;
+}
+
+.btn-circle.right-side-toggle {
+    background: #b34c6f;
+}
+.buttom-side-toggle{
+	background: #b34c6f;
+}
+.bottom-sidebar h2{
+	background: #b34c6f;
+}
+.right-sidebar .rpanel-title {
+    background: #b34c6f;
+}
+.form_section {
+	border-color:#88385b;
+	color: #000;
+}
+.form_content_title {
+	background-color: #88385b!important;
+}
+table.dataTable thead {
+	background-color: #88385b;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:active {
+	background-color: #88385b !important;
+	background: #88385b !important;
+}
+.paging_simple_numbers .pagination .paginate_button.active {
+	background: #88385b;
+	border-color: #88385b;
+}
+.paging_simple_numbers .pagination .paginate_button.active a,
+	.paging_simple_numbers .pagination .paginate_button:hover a {
+	background: #88385b;
+}
+.paging_simple_numbers .pagination .paginate_button:hover {
+	background: #88385b;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover,
+	.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:active
+	{
+	background: #88385b;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+	border-color:#88385b;
+}
+.form_section .form-inline .input-group.date .inner-addon .fa {
+	color: #88385b;
+}
+.form_section .form-inline .new-radio-button [type="radio"]:checked+label::after,
+	[type="radio"].with-gap:checked+label::after {
+	background-color: #88385b;
+}
+
+.form_section .form-inline .new-radio-button [type="radio"]:checked+label::after,
+	[type="radio"].with-gap:checked+label::before, [type="radio"].with-gap:checked+label::after
+	{
+	border-color:#88385b;
+}
+.mini-sidebar .sidebar-nav #sidebarnav>li:hover>a {
+	background: #88385b;
+}
+.mini-sidebar .sidebar-nav ul li ul li:hover a {
+	background: #88385b;
+}
+.mini-sidebar .sidebar-nav ul li ul li:hover a {
+	background: #88385b;
+}
+.sidebar-nav>ul>li>a.active {
+	background: #88385b;
+}
+.sidebar-nav ul li a:hover {
+	background: #88385b;
+}
+.sidebar-nav>ul>li.active>a {
+	background: #88385b;
+}
+.sidebar-nav>ul>li>ul>li.active a {
+	background: #88385b;
+}
+.sidebar-nav ul li ul li a:hover {
+	background: #88385b;
+}
+.submit_col .btn-primary, .submit_col .btn-primary.disabled {
+	background: #88385b;
+	border-color:#88385b;
+}
+.submit_col .btn-primary:hover, .submit_col .btn-primary.disabled:hover
+	{
+	background: #88385b;
+	border-color:#88385b;
+}
+.form_section .form-inline .new-radio-button [type="radio"]:checked+label::after,
+	[type="radio"].with-gap:checked+label::after {
+		border-color:#88385b;
+}
+
+.form_section .form-inline .new-radio-button [type="radio"]:checked+label::after,
+	[type="radio"].with-gap:checked+label::before, [type="radio"].with-gap:checked+label::after
+	{
+		border-color:#88385b;
+}
+.form_section .form-inline [type="checkbox"].filled-in:checked+label:after
+	{
+	border-color:#88385b;
+	background-color: #88385b;
+	}
+	.form_section .form-inline input {
+	border-color:#88385b;
+}
+.form_section .three_column_form .three_column_form_column .input-group.date {
+	border-color:#88385b;
+}
+.form_section .form-inline select {
+	border-color:#88385b;
+}
+.form_section .form-inline .input-group.date .inner-addon .fa {
+	color: #88385b;
+}
+
+
+
+/* =================================== */
+.sidebar-nav ul li a {
+    color: #f0f6ff;
+}
+.sidebar-nav>ul>li>a i {
+	color: #f0f6ff;
+}
+table.table-bordered.dataTable tbody tr:nth-of-type(odd) {
+	background: #88385b26;
+}
+table.table-bordered.dataTable tbody tr:nth-of-type(even) {
+		background: #88385b66;
+}
+.btn-inverse, .btn-inverse.disabled {
+    background:#16899c;
+    border-color: #16899c;
+}
+.btn-inverse:hover, .btn-inverse.disabled:hover {
+	background:#16899cdb;
+    border-color: #16899cdb;	
+}
+.single_select_box>.bootstrap-select>.dropdown-toggle {
+    border-color: #88385b;
+}
+.single_select_box>.select_box_two>.bootstrap-select>.dropdown-toggle {
+	border-color: #88385b;
+}
+.select2-container--default .select2-selection--single {
+	border-color: #88385b!important;
+}
+.form_section .form-inline .input-group.date {
+	border-color: #88385b;
+}
+.select2-dropdown {
+    border-color: #88385b !important;
+}
+.sidebar-nav>ul>li.active>a {
+	border-color: #d2709b;
+    border-right-color: #88385b;
+}
+.dt-buttons .dt-button {
+    background: #88385b!important;
+}

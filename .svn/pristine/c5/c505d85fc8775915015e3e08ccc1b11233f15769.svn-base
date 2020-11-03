@@ -1,0 +1,10 @@
+ims.controller('NotificationController', function($scope, $http, FetchService,
+		UrlConstants) {
+
+	FetchService.getAllNotificationDetails().then(function(response) {
+		$scope.notificationDtoList	 = response;
+
+	
+	});
+
+});

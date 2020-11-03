@@ -1,0 +1,80 @@
+ims.controller('InventoryCountController',
+		function($http, FetchService, $scope,$location,UrlConstants) {
+	
+	$scope.alertMsg = "Loading";
+
+			$scope.inventoryManagementMaster = [];
+			$scope.TempMaster = [];
+
+			
+		     var absurl = $location.absUrl();
+			if(absurl == UrlConstants.REDIRECTOFFICEADMINIMS_URL+"InventoryCount" || absurl == UrlConstants.REDIRECTWAREHOUSEADMINIMS_URL+"InventoryCount")
+		{			
+				FetchService.getAllInventoryManagement().then(
+						function(response) {
+							$scope.TempMaster = response;
+							
+							if($scope.TempMaster.length == 0){
+								$scope.alertMsg = "No Records Found";
+							}
+
+							for (i = 0; i < $scope.TempMaster.length; i++) {
+
+								
+
+		 if ($scope.inventoryManagementMaster.length == 0) {
+		 $scope.inventoryManagementMaster.push($scope.TempMaster[i]);
+		 }
+	  else{
+	var index = $scope.inventoryManagementMaster.map((o) => o.subCategory).indexOf($scope.TempMaster[i].subCategory);
+
+	if(index != -1){
+		$scope.inventoryManagementMaster[index].availableQuantity  = $scope.inventoryManagementMaster[index].availableQuantity + $scope.TempMaster[i].availableQuantity;
+	}
+	else{
+		$scope.inventoryManagementMaster.push($scope.TempMaster[i]);
+	     }
+	            }
+			}
+				});
+			
+		}else{
+			FetchService.getCurrentUserInventoryAssign().then(function(response){
+				$scope.TempMaster = response;
+				
+				
+				if($scope.TempMaster.length == 0){
+					$scope.alertMsg = "No Records Found";
+				}
+				
+				
+				for (i = 0; i < $scope.TempMaster.length; i++) {
+
+					
+
+					 if ($scope.inventoryManagementMaster.length == 0) {
+					 $scope.inventoryManagementMaster.push($scope.TempMaster[i]);
+					 }
+				  else{
+				var index = $scope.inventoryManagementMaster.map((o) => o.subCategory).indexOf($scope.TempMaster[i].subCategory);
+
+				if(index != -1){
+					$scope.inventoryManagementMaster[index].availableQuantity  = $scope.inventoryManagementMaster[index].availableQuantity + $scope.TempMaster[i].availableQuantity;
+				}
+				else{
+					$scope.inventoryManagementMaster.push($scope.TempMaster[i]);
+				     }
+				            }
+						}
+				
+				
+				});
+		}
+// FetchService.getAllInventoryUserCount().then(function(response)
+// {
+// $scope.inventoryAssignDtoList=response;
+// console.log(JSON.stringify(response));
+// });
+			
+			
+		});

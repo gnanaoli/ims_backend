@@ -1,0 +1,1192 @@
+package com.fa.inventory.service.impl;
+
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
+import org.apache.log4j.Logger;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.fa.inventory.common.util.MasterDateUtil;
+import com.fa.inventory.constants.InventoryConstant;
+import com.fa.inventory.dto.BulkRequestResponseDto;
+import com.fa.inventory.dto.DeliveryChallanDto;
+import com.fa.inventory.dto.DispatcherLogDto;
+import com.fa.inventory.dto.InventoryEntranceDto;
+import com.fa.inventory.dto.ProjectDto;
+import com.fa.inventory.dto.ResponseDto;
+import com.fa.inventory.dto.WareHouseDto;
+import com.fa.inventory.entity.Category;
+import com.fa.inventory.entity.DeliveryChallanEntity;
+import com.fa.inventory.entity.DispatcherLog;
+import com.fa.inventory.entity.InventoryAssign;
+import com.fa.inventory.entity.InventoryEntrance;
+import com.fa.inventory.entity.Manufacturer;
+import com.fa.inventory.entity.Scrap;
+import com.fa.inventory.entity.ServiceTracker;
+import com.fa.inventory.entity.SubCategory;
+import com.fa.inventory.entity.Supplier;
+import com.fa.inventory.repository.CategoryRepository;
+import com.fa.inventory.repository.DispatchLogRepository;
+import com.fa.inventory.repository.InventoryAssignRepository;
+import com.fa.inventory.repository.InventoryStockRepository;
+import com.fa.inventory.repository.ManufacturerRepository;
+import com.fa.inventory.repository.ScrapRepository;
+import com.fa.inventory.repository.ServiceTrackerRepository;
+import com.fa.inventory.repository.SubCategoryRepository;
+import com.fa.inventory.repository.SupplierRepository;
+import com.fa.inventory.service.DispatchLogService;
+import com.fa.inventory.service.InventoryManagementService;
+import com.fa.inventory.service.ToolsRequestService;
+import com.fa.inventory.service.UserManagementService;
+
+@Service
+@Transactional("InventoryTransactionManager")
+public class DispatchLogManagementServiceImpl  implements DispatchLogService{
+
+	
+	protected final Logger logger = Logger.getLogger(DispatchLogManagementServiceImpl.class);
+	
+	
+	@Resource
+	DispatchLogRepository dispatchLogRepository;
+	
+	
+	@Resource
+	CategoryRepository categoryRepository;
+	
+	
+	@Resource
+	UserManagementService userManagementService;
+	
+	@Resource
+	InventoryManagementService inventoryManagementService;
+	
+	
+	@Resource
+	InventoryStockRepository inventoryStockRepository;
+
+	@Resource
+	ToolsRequestService toolsRequestService; 
+	
+	@Resource
+	SubCategoryRepository subCategoryRepository;
+	
+	@Resource
+	ManufacturerRepository manufacturerRepository;
+	
+	
+	@Resource
+	SupplierRepository supplierRepository;
+	
+	@Resource
+	InventoryAssignRepository inventoryAssignRepository;
+	
+	@Resource(name="Inventory")
+	JdbcTemplate jdbcTemplate;
+	
+	@Resource
+	ServiceTrackerRepository serviceTrackerRepository;
+	
+	@Resource
+	ScrapRepository scrapRepository;
+	
+	@PersistenceContext(unitName="InventoryFactory")
+	EntityManager entityManager;
+	
+	
+	@Override
+	public List<DispatcherLogDto> getAllDispatchLog(Principal principal) {
+		logger.info("<--DispatchLogManagementServiceImpl-------------getAllDispatchLog--------------------started-->");
+		List<DispatcherLogDto> dispatcherLogDtoList=new ArrayList<>();
+		try {
+			
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			if(authentication.getAuthorities().stream()
+			          .anyMatch(r -> r.getAuthority().equals(InventoryConstant.WAREHOUSE_ADMINISTRATOR)))
+			{
+			 List<WareHouseDto> warehouseDtoList=userManagementService.getCurrentUserWareHouseDtoList(principal);
+			 
+			 if(warehouseDtoList!=null)
+			 {
+				 
+				 for(int i=0;i<warehouseDtoList.size();i++)
+				 {
+					 WareHouseDto wareHouseDto=warehouseDtoList.get(i);
+					 if(wareHouseDto!=null)
+					 {
+						 List<DispatcherLog> dispatcherLogEntityList=dispatchLogRepository.findByRequestedFrom(wareHouseDto.getWareHouseName());
+							if(dispatcherLogEntityList!=null)
+							{
+								for(int j=0;j<dispatcherLogEntityList.size();j++)
+								{
+									DispatcherLog dispatcherLog=dispatcherLogEntityList.get(j);
+									if(dispatcherLog!=null)
+									{
+										dispatcherLogDtoList.add(mapDispatcherLogDto(dispatcherLog));
+									}
+								}
+							} 
+					 }
+				 }
+			 }
+		}
+			else if(authentication.getAuthorities().stream()
+			          .anyMatch(r -> r.getAuthority().equals(InventoryConstant.OFFICE_ADMINISTRATOR))){
+				
+			}
+			else{
+				Boolean role=authentication.getAuthorities().stream()
+		          .anyMatch(r -> r.getAuthority().equals(InventoryConstant.USER) || r.getAuthority().equals(InventoryConstant.SUPER_USER)
+		        		  || r.getAuthority().equals(InventoryConstant.ENQUIRY)
+		        		  || r.getAuthority().equals(InventoryConstant.SAFETY_ENGINEER));
+				
+				if(role)
+				{
+					List<ProjectDto> projectDtoList=inventoryManagementService.getCurrentUserProjectDtoList(principal);
+					
+					if(projectDtoList!=null)
+					 {
+						 
+						 for(int i=0;i<projectDtoList.size();i++)
+						 {
+							 
+							 ProjectDto projectDto=projectDtoList.get(i);
+							 
+							 if(projectDto!=null)
+							 {
+								 List<DispatcherLog> dispatcherLogEntityList=dispatchLogRepository.findByRequestedFrom(projectDto.getName());
+									if(dispatcherLogEntityList!=null)
+									{
+										for(int j=0;j<dispatcherLogEntityList.size();j++)
+										{
+											DispatcherLog dispatcherLog=dispatcherLogEntityList.get(j);
+											if(dispatcherLog!=null)
+											{
+												dispatcherLogDtoList.add(mapDispatcherLogDto(dispatcherLog));
+											}
+										}
+									} 
+							 }
+						 }
+					 }
+				}
+			}
+	}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------getAllDispatchLog--------------------started-->");
+		return dispatcherLogDtoList;
+	}
+	
+	@Override
+	public ResponseDto addInventoryInDispatch(BulkRequestResponseDto bulkRequestResponseDto,Principal principal) {
+		logger.info("<--DispatchLogManagementServiceImpl-------------addInventoryInDispatch--------------------started-->");
+		String referenceNo=null;
+		ResponseDto responseDto=new ResponseDto();
+		try {
+			
+			if(bulkRequestResponseDto!=null)
+			{
+			   referenceNo=toolsRequestService.getRefNoSequence();
+					for(int i=0;i<bulkRequestResponseDto.getInventoryEntranceItemDto().size();i++)
+					{
+						InventoryEntranceDto inventoryEntranceDto=bulkRequestResponseDto.getInventoryEntranceItemDto().get(i);
+						if(inventoryEntranceDto!=null)
+						{
+							if(inventoryEntranceDto.getAllocatableQuantity()>0 && inventoryEntranceDto.getSelected())
+							{
+								InventoryEntrance inventoryEntrance=inventoryStockRepository.findOne(bulkRequestResponseDto.getInventoryEntranceItemDto().get(i).getId());
+								if(inventoryEntrance.getAvailableQuantity()!=null && inventoryEntrance.getAvailableQuantity()>0)
+								{
+									inventoryEntrance.setAvailableQuantity(inventoryEntrance.getAvailableQuantity()-inventoryEntranceDto.getAllocatableQuantity());
+									if(inventoryEntrance.getAvailableQuantity()==0)
+									{
+										inventoryEntrance.setQuantity(0);
+									}
+									inventoryStockRepository.saveAndFlush(inventoryEntrance);
+									entityManager.merge(mapDispatcherEntity(bulkRequestResponseDto, inventoryEntranceDto, principal, referenceNo));	
+								}
+							}
+						}
+					}
+					entityManager.flush();
+					entityManager.clear();
+					entityManager.close();
+				}
+				responseDto.setStatus(InventoryConstant.SUCCESS);
+				responseDto.setNumber(referenceNo);
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------addInventoryInDispatch--------------------Ended-->");
+		return responseDto;
+	}
+	
+	@Override
+	public ResponseDto addInventoryInDispatchForWareHouse(BulkRequestResponseDto bulkRequestResponseDto,String moveTowarehouse,String referenceNo,Principal principal) {
+		logger.info("<--DispatchLogManagementServiceImpl-------------addInventoryInDispatchForWareHouse--------------------started-->");
+		ResponseDto responseDto=new ResponseDto();
+		try {
+			
+			if(bulkRequestResponseDto!=null)
+			{
+					for(int i=0;i<bulkRequestResponseDto.getInventoryEntranceItemDto().size();i++)
+					{
+						InventoryEntranceDto inventoryEntranceDto=bulkRequestResponseDto.getInventoryEntranceItemDto().get(i);
+						if(inventoryEntranceDto!=null)
+						{
+							if(inventoryEntranceDto.getAllocatableQuantity()>0)
+							{
+								entityManager.merge(mapDispatcherEntityForWareHouseMove(bulkRequestResponseDto, inventoryEntranceDto,principal, referenceNo));
+							}
+						}
+					}
+					entityManager.flush();
+					entityManager.clear();
+					entityManager.close();;
+				}
+				responseDto.setStatus(InventoryConstant.SUCCESS);
+				responseDto.setNumber(referenceNo);
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------addInventoryInDispatchForWareHouse--------------------Ended-->");
+		return responseDto;
+	}
+	
+	
+	
+	
+	
+	
+	@Override
+	public List<DispatcherLogDto> getAllDispatcherLogByCount(Principal principal) {
+		logger.info("<--DispatchLogManagementServiceImpl-------------getAllDispatcherLogByCount--------------------started-->");
+		List<DispatcherLogDto> dispatcherLogDtoList=new ArrayList<>();
+		try {
+			
+             List<WareHouseDto> warehouseDtoList=userManagementService.getCurrentUserWareHouseDtoList(principal);
+			 if(warehouseDtoList!=null && warehouseDtoList.size()>0)
+			 {
+				 
+				 for(int i=0;i<warehouseDtoList.size();i++)
+				 {
+					 WareHouseDto wareHouseDto=warehouseDtoList.get(i);
+					 if(wareHouseDto!=null)
+					 {
+						 List<Object> objectList=dispatchLogRepository.getAvailableQuantityCount(wareHouseDto.getWareHouseName());
+							if(objectList!=null)
+							{
+								for(int j=0;j<objectList.size();j++)
+								{
+									Object[] objectArray=(Object[]) objectList.get(j);
+									DispatcherLogDto dispatcherLogDto=new DispatcherLogDto();
+									dispatcherLogDto.setAvailableQuantity(objectArray[0].toString());
+									if(objectArray[1] != null){
+										dispatcherLogDto.setRequestedTo(objectArray[1].toString());
+									}else{
+										dispatcherLogDto.setRequestedTo("");
+									}
+									dispatcherLogDto.setRequestedFrom(objectArray[2].toString());
+									dispatcherLogDtoList.add(dispatcherLogDto);
+								}
+							} 
+					 }
+				 }
+			}
+			 else{
+				 
+				 List<ProjectDto> projectDtoList=inventoryManagementService.getCurrentUserProjectDtoList(principal);
+				 for(int i=0;i<projectDtoList.size();i++)
+				 {
+					 ProjectDto projectDto=projectDtoList.get(i);
+					 if(projectDto!=null)
+					 {
+						 List<Object> objectList=dispatchLogRepository.getAvailableQuantityCount(projectDto.getName());
+							if(objectList!=null)
+							{
+								for(int j=0;j<objectList.size();j++)
+								{
+									Object[] objectArray=(Object[]) objectList.get(j);
+									DispatcherLogDto dispatcherLogDto=new DispatcherLogDto();
+									dispatcherLogDto.setAvailableQuantity(objectArray[0].toString());
+									
+									if(objectArray[1] != null){
+										dispatcherLogDto.setRequestedTo(objectArray[1].toString());
+									}else{
+										dispatcherLogDto.setRequestedTo("");
+									}
+									
+									dispatcherLogDto.setRequestedFrom(objectArray[2].toString());
+									dispatcherLogDtoList.add(dispatcherLogDto);
+								}
+							} 
+					 }
+				 }
+			 }
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------getAllDispatcherLogByCount--------------------Ended-->");
+		return dispatcherLogDtoList;
+	}
+	
+	
+	
+	public DispatcherLogDto mapDispatcherLogDto(DispatcherLog dispatcherLog){
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatcherLogDto--------------------started-->");
+		DispatcherLogDto dispatcherLogDto=new DispatcherLogDto();
+		dispatcherLogDto.setId(dispatcherLog.getId());
+		dispatcherLogDto.setRequestedTo(dispatcherLog.getRequestedTo());
+		dispatcherLogDto.setReferenceNo(dispatcherLog.getReferenceNo());
+		dispatcherLogDto.setQuantity(dispatcherLog.getQuantity());
+		dispatcherLogDto.setQuantityInTransferProcess(dispatcherLog.getQuantityInTransferProcess());
+		dispatcherLogDto.setAvailableQuantity(String.valueOf(dispatcherLog.getAvailableQuantity()));
+		dispatcherLogDto.setAcceptedQuantity(dispatcherLog.getAcceptedQuantity());
+		dispatcherLogDto.setActionDate(new Date());
+		dispatcherLogDto.setLocation(dispatcherLog.getLocation());
+		dispatcherLogDto.setModelCode(dispatcherLog.getModelCode());
+		dispatcherLogDto.setPurpose(dispatcherLog.getPurpose());
+		dispatcherLogDto.setReason(dispatcherLog.getReason());
+//		if(dispatcherLog.getPrice() == null){
+//			dispatcherLogDto.setPrice("");
+//		}else{
+//			dispatcherLogDto.setPrice(dispatcherLog.getPrice().toString());
+//		}
+		if(dispatcherLog.getCategory()!=null)
+		{
+			dispatcherLogDto.setCategoryType(dispatcherLog.getCategory().getCategoryType());
+			dispatcherLogDto.setAssetTracking(dispatcherLog.getCategory().getAssetTracking());
+		}
+		if(dispatcherLog.getSubCategory()!=null)
+		{
+			dispatcherLogDto.setSubCategory(dispatcherLog.getSubCategory().getSubCategory());
+		}
+		dispatcherLogDto.setRaisedDate(new Date());
+		dispatcherLogDto.setStatus(dispatcherLogDto.getStatus());
+		dispatcherLogDto.setSubStatus(dispatcherLogDto.getSubStatus());
+		dispatcherLogDto.setRequestedFrom(dispatcherLog.getRequestedFrom());
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatcherLogDto--------------------Ended-->");
+		return dispatcherLogDto;
+	}
+	
+	
+	
+	
+	public DispatcherLog mapDispatcherEntity(BulkRequestResponseDto bulkRequestResponseDto,
+			InventoryEntranceDto inventoryEntranceDto,Principal principal,String referenceNo){
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatcherEntity--------------------started-->");
+		DispatcherLog dispatchLog=new DispatcherLog();
+		dispatchLog.setRequestedTo(bulkRequestResponseDto.getProjectName());
+		dispatchLog.setReferenceNo(referenceNo);
+		//dispatchLog.setQuantity(inventoryEntranceDto.getQuantity());
+		dispatchLog.setQuantityInTransferProcess(inventoryEntranceDto.getAllocatableQuantity());
+		dispatchLog.setAcceptedQuantity(inventoryEntranceDto.getAllocatableQuantity());
+		dispatchLog.setAvailableQuantity(inventoryEntranceDto.getAllocatableQuantity());
+		dispatchLog.setActionDate(new Date());
+		dispatchLog.setActionBy(principal.getName());
+		dispatchLog.setLocation(InventoryConstant.WAREHOUSE);
+		dispatchLog.setModelCode(inventoryEntranceDto.getModelCode());
+		dispatchLog.setRaisedBy(principal.getName());
+		dispatchLog.setRaisedDate(new Date());
+		dispatchLog.setDispatchedQuantity(0);
+		dispatchLog.setDispatchDate(new Date());
+		dispatchLog.setRequiredDays(0);
+		dispatchLog.setQuantity(inventoryEntranceDto.getAllocatableQuantity());
+		dispatchLog.setComments(null);
+		dispatchLog.setVehicleNumber("0");
+		dispatchLog.setStatus(InventoryConstant.PENDING);
+		dispatchLog.setSubStatus(InventoryConstant.WAITING_FOR_ACCEPTANCE);
+		dispatchLog.setRequestedFrom(inventoryEntranceDto.getSite());
+		dispatchLog.setPurpose(InventoryConstant.ASSIGN_TO_PROJECT);
+		dispatchLog.setReason(InventoryConstant.PROJECT);
+		Category category=categoryRepository.findByCategoryCode(inventoryEntranceDto.getCategoryCode());
+		if(category!=null)
+		{
+			dispatchLog.setCategory(category);
+		}
+		SubCategory subCategory=subCategoryRepository.findByModel(inventoryEntranceDto.getModelCode());
+		if(subCategory!=null)
+		{
+			dispatchLog.setSubCategory(subCategory);
+		}
+		
+		InventoryEntrance inventoryEntrance=inventoryStockRepository.findOne(inventoryEntranceDto.getId());
+		if(inventoryEntrance!=null)
+		{
+			dispatchLog.setInventoryEntrance(inventoryEntrance);
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatcherEntity--------------------Ended-->");
+		return dispatchLog;
+	}
+
+	
+	
+	
+	public DispatcherLog mapDispatcherEntityForWareHouseMove(BulkRequestResponseDto bulkRequestResponseDto,
+			InventoryEntranceDto inventoryEntranceDto,Principal principal,String referenceNo){
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatcherEntityForWareHouseMove--------------------started-->");
+		DispatcherLog dispatchLog=new DispatcherLog();
+		dispatchLog.setRequestedTo(bulkRequestResponseDto.getProjectName());
+		dispatchLog.setReferenceNo(referenceNo);
+		dispatchLog.setQuantity(inventoryEntranceDto.getQuantity());
+		dispatchLog.setAcceptedQuantity(inventoryEntranceDto.getAllocatableQuantity());
+		dispatchLog.setAvailableQuantity(inventoryEntranceDto.getAllocatableQuantity());
+		dispatchLog.setActionDate(new Date());
+		dispatchLog.setActionBy(principal.getName());
+		dispatchLog.setLocation(InventoryConstant.WAREHOUSE);
+		dispatchLog.setModelCode(inventoryEntranceDto.getModelCode());
+		dispatchLog.setRaisedBy(principal.getName());
+		dispatchLog.setRaisedDate(new Date());
+		dispatchLog.setDispatchedQuantity(0);
+		dispatchLog.setDispatchDate(new Date());
+		dispatchLog.setRequiredDays(0);
+		dispatchLog.setQuantity(inventoryEntranceDto.getAllocatableQuantity());
+		dispatchLog.setQuantityInTransferProcess(inventoryEntranceDto.getAllocatableQuantity());
+		dispatchLog.setComments(null);
+		dispatchLog.setVehicleNumber("0");
+		dispatchLog.setStatus(InventoryConstant.PENDING);
+		dispatchLog.setSubStatus(InventoryConstant.WAITING_FOR_ACCEPTANCE);
+	
+		dispatchLog.setRequestedFrom(inventoryEntranceDto.getSite());
+		dispatchLog.setInventoryNumber(inventoryEntranceDto.getInventoryNumber());
+		dispatchLog.setPurpose(InventoryConstant.MOVETOWAREHOUSEREQUESTED);
+		dispatchLog.setReason(InventoryConstant.WAREHOUSE);
+			
+		InventoryAssign inventoryAssign=inventoryAssignRepository.findOne(inventoryEntranceDto.getId());
+		if(inventoryAssign!=null)
+		{
+			dispatchLog.setInventoryEntrance(inventoryAssign.getInventoryEntrance());
+		}
+		Category category=categoryRepository.findByCategoryCode(inventoryEntranceDto.getCategoryCode());
+		if(category!=null)
+		{
+			dispatchLog.setCategory(category);
+		}
+		SubCategory subCategory=subCategoryRepository.findByModel(inventoryEntranceDto.getModelCode());
+		if(subCategory!=null)
+		{
+			dispatchLog.setSubCategory(subCategory);
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatcherEntityForWareHouseMove--------------------Ended-->");
+		return dispatchLog;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/*
+	private InventoryAssign mapInventoryAssignForId(Long id) {
+	InventoryAssign inventoryAssign=new InventoryAssign();
+	logger.info("<--DispatchLogManagementServiceImpl-------------mapInventoryAssignForId--------------------started-->");
+	inventoryAssign=inventoryAssignRepository.findOne(id);
+	logger.info("<--DispatchLogManagementServiceImpl-------------mapInventoryAssignForId--------------------started-->");
+	return inventoryAssign;
+	}*/
+	
+	@Override
+	public List<DispatcherLogDto> getDispatchLogBySiteName(DispatcherLogDto dispatcherLogDto, Principal principal) {
+		logger.info("<--DispatchLogManagementServiceImpl-------------getDispatchLogBySiteName--------------------started-->");
+		List<DispatcherLogDto> dispatcherLogDtoList=new ArrayList<>();
+		try {
+			 List<DispatcherLog> dispatcherLogEntityList=dispatchLogRepository.findByRequestedFrom(dispatcherLogDto.getRequestedFrom());
+				if(dispatcherLogEntityList!=null)
+				{
+					for(int j=0;j<dispatcherLogEntityList.size();j++)
+					{
+						DispatcherLog dispatcherLog=dispatcherLogEntityList.get(j);
+						if(dispatcherLog!=null)
+						{
+							dispatcherLogDtoList.add(mapDispatcherLogDto(dispatcherLog));
+						}
+					}
+				} 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------getDispatchLogBySiteName--------------------started-->");
+		return dispatcherLogDtoList;
+	}
+	
+	
+	
+	/*@Override
+	public List<DispatcherLogDto> getDispatchLogByRequestedTo(DispatcherLogDto dispatcherLogDto, Principal principal) {
+		logger.info("<--DispatchLogManagementServiceImpl-------------getDispatchLogByRequestedTo--------------------started-->");
+		List<DispatcherLogDto> dispatcherLogDtoList=new ArrayList<>();
+		try {
+			
+			List<WareHouseDto> warehouseDtoList=userManagementService.getCurrentUserWareHouseDtoList(principal);
+			
+			List<ProjectDto> projectDtoList=inventoryManagementService.getCurrentUserProjectDtoList(principal);
+			
+			if(warehouseDtoList!=null && !warehouseDtoList.isEmpty())
+			{
+				
+				for(int i=0;i<warehouseDtoList.size();i++)
+				{
+					WareHouseDto wareHouseDto=warehouseDtoList.get(i);
+					if(wareHouseDto!=null)
+					{
+						 List<DispatcherLog> dispatcherLogEntityList=dispatchLogRepository.findByRequestedToAndRequestedFrom(dispatcherLogDto.getRequestedTo(),wareHouseDto.getWareHouseName());
+							if(dispatcherLogEntityList!=null)
+							{
+								for(int j=0;j<dispatcherLogEntityList.size();j++)
+								{
+									DispatcherLog dispatcherLog=dispatcherLogEntityList.get(j);
+									//if(dispatcherLog!=null && dispatcherLog.getAvailableQuantity()>0 && dispatcherLog.getStatus().equals(InventoryConstant.PENDING) || dispatcherLog.getStatus().equals(InventoryConstant.PARTIALLY_DISPATCHED) )
+									if(dispatcherLog!=null && dispatcherLog.getAvailableQuantity()>0)
+									{
+										dispatcherLogDtoList.add(mapDispatcherLogDto(dispatcherLog));
+									}
+								}
+							} 
+					}
+				}
+				
+			}
+			else if(projectDtoList!=null && !projectDtoList.isEmpty())
+			{
+				for(int i=0;i<projectDtoList.size();i++)
+				{
+					ProjectDto projectDto=projectDtoList.get(i);
+					if(projectDto!=null)
+					{
+						 List<DispatcherLog> dispatcherLogEntityList=dispatchLogRepository.findByRequestedToAndRequestedFrom(dispatcherLogDto.getRequestedTo(),projectDto.getName());
+							if(dispatcherLogEntityList!=null)
+							{
+								for(int j=0;j<dispatcherLogEntityList.size();j++)
+								{
+									DispatcherLog dispatcherLog=dispatcherLogEntityList.get(j);
+									//if(dispatcherLog!=null && dispatcherLog.getAvailableQuantity()>0 && dispatcherLog.getStatus().equals(InventoryConstant.PENDING) || dispatcherLog.getStatus().equals(InventoryConstant.PARTIALLY_DISPATCHED) )
+									if(dispatcherLog!=null && dispatcherLog.getAvailableQuantity()>0)
+									{
+										dispatcherLogDtoList.add(mapDispatcherLogDto(dispatcherLog));
+									}
+								}
+							} 
+					}
+				}
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------getDispatchLogByRequestedTo--------------------Ended-->");
+		return dispatcherLogDtoList;
+	}*/
+	
+	@Override
+	public List<DispatcherLogDto> getDispatchLogByRequestedToAndRequestedFrom(DispatcherLogDto dispatcherLogDto, Principal principal) {
+		logger.info("<--DispatchLogManagementServiceImpl-------------getDispatchLogByRequestedToAndRequestedFrom--------------------started-->");
+		List<DispatcherLogDto> dispatcherLogDtoList=new ArrayList<>();
+		try {
+			
+			 List<DispatcherLog> dispatcherLogEntityList=dispatchLogRepository.findByRequestedToAndRequestedFrom(dispatcherLogDto.getRequestedTo(),dispatcherLogDto.getRequestedFrom());
+				if(dispatcherLogEntityList!=null)
+				{
+					for(int j=0;j<dispatcherLogEntityList.size();j++)
+					{
+						DispatcherLog dispatcherLog=dispatcherLogEntityList.get(j);
+						//if(dispatcherLog!=null && dispatcherLog.getAvailableQuantity()>0 && dispatcherLog.getStatus().equals(InventoryConstant.PENDING) || dispatcherLog.getStatus().equals(InventoryConstant.PARTIALLY_DISPATCHED) )
+						if(dispatcherLog!=null && dispatcherLog.getAvailableQuantity()>0)
+						{
+							dispatcherLogDtoList.add(mapDispatcherLogDto(dispatcherLog));
+						}
+					}
+				} 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------getDispatchLogByRequestedToAndRequestedFrom--------------------Ended-->");
+		return dispatcherLogDtoList;
+	}
+
+	@Override
+	public ResponseDto generateChallenNo(BulkRequestResponseDto bulkRequestResponseDto,Principal principal) {
+		logger.info("<--DispatchLogManagementServiceImpl-------------generateChallenNo--------------------started-->");
+		ResponseDto responseDto=new ResponseDto();
+		Integer remaining=null;
+		List<DeliveryChallanEntity> deliveryChallanEntitiesList=null;
+		String challanNo=null;
+		try {
+			if(bulkRequestResponseDto!=null)
+			{
+				challanNo=getChallanNumber();
+				for(int i=0;i<bulkRequestResponseDto.getInventoryEntranceItemDto().size();i++)
+				{
+					InventoryEntranceDto inventoryEntranceDto=bulkRequestResponseDto.getInventoryEntranceItemDto().get(i);
+					deliveryChallanEntitiesList=new ArrayList<>();
+					if(inventoryEntranceDto!=null)
+					{
+						if(inventoryEntranceDto.getAllocatableQuantity()>0 && inventoryEntranceDto.getSelected())
+						{
+							DispatcherLog dispatcherLog=new DispatcherLog();
+							dispatcherLog=dispatchLogRepository.findOne(bulkRequestResponseDto.getInventoryEntranceItemDto().get(i).getId());
+							if(dispatcherLog.getAvailableQuantity()!=null && dispatcherLog.getAvailableQuantity()>0)
+							{
+								remaining=dispatcherLog.getAvailableQuantity()-inventoryEntranceDto.getAllocatableQuantity();
+								dispatcherLog.setAvailableQuantity(remaining);
+								dispatcherLog.setQuantityInTransferProcess(inventoryEntranceDto.getAllocatableQuantity());
+								if(dispatcherLog.getAvailableQuantity()==0)
+								{
+									//dispatcherLog.setQuantity(0);
+									dispatcherLog.setStatus(InventoryConstant.ITEM_DISPATCHED);
+									dispatcherLog.setSubStatus(InventoryConstant.CHALLAN_GENERATED);
+									
+								}
+								else{
+									dispatcherLog.setStatus(InventoryConstant.PARTIALLY_DISPATCHED);
+									dispatcherLog.setSubStatus(InventoryConstant.CHALLAN_GENERATED);
+								}
+								
+								if(inventoryEntranceDto.getPurpose().equals(InventoryConstant.MOVETOSERVICEREQUESTED)){
+//									dispatcherLog.setStatus(InventoryConstant.ITEM_RECEIVED);
+									dispatcherLog.setSubStatus(InventoryConstant.CHALLAN_GENERATED);
+									responseDto.setExceptionMessage(InventoryConstant.MOVEDTOSERVICE);
+								}
+								
+								dispatcherLog.setPrice(MasterDateUtil.ConvertStringtoInteger(inventoryEntranceDto.getPrice()));
+								
+//								if(!inventoryEntranceDto.getPrice().equals("-")){
+//									dispatcherLog.setPrice(MasterDateUtil.ConvertStringtoInteger(inventoryEntranceDto.getPrice()));
+//								}else{
+//									dispatcherLog.setPrice(0);
+//								}
+//								
+								
+								dispatcherLog.setChallanNo(challanNo);
+								dispatcherLog.setVehicleNumber(bulkRequestResponseDto.getDeliveryChallanDto().getVehicleNo());
+								dispatcherLog.setDispatchedQuantity(dispatcherLog.getDispatchedQuantity()+inventoryEntranceDto.getAllocatableQuantity());
+								
+								if(dispatcherLog.getDeliveryChallanEntityList()!=null && !dispatcherLog.getDeliveryChallanEntityList().isEmpty())
+								{
+									dispatcherLog.getDeliveryChallanEntityList().add(mapDeliveryChallanEntity(bulkRequestResponseDto.getDeliveryChallanDto(),challanNo,inventoryEntranceDto,dispatcherLog,bulkRequestResponseDto,principal));
+								}
+								else{
+									deliveryChallanEntitiesList.add(mapDeliveryChallanEntity(bulkRequestResponseDto.getDeliveryChallanDto(),challanNo,inventoryEntranceDto,dispatcherLog,bulkRequestResponseDto,principal));
+									dispatcherLog.setDeliveryChallanEntityList(deliveryChallanEntitiesList);
+								}
+								dispatchLogRepository.saveAndFlush(dispatcherLog);
+							}
+						}
+					}
+				}
+				
+				responseDto.setStatus(InventoryConstant.SUCCESS);
+				responseDto.setNumber(challanNo);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------generateChallenNo--------------------Ended-->");
+		return responseDto;
+	}
+	
+	
+	
+	private String getChallanNumber() {
+		String inventoryNo=null;
+		logger.info("<--DispatchLogManagementServiceImpl-------------getChallanNumber--------------------started-->");
+		inventoryNo = jdbcTemplate.queryForObject("CALL `challan_number_seq`()", String.class);
+		logger.info("<--DispatchLogManagementServiceImpl-------------getChallanNumber--------------------ended-->");
+		return inventoryNo;
+	}
+	
+	
+	public DeliveryChallanEntity mapDeliveryChallanEntity(DeliveryChallanDto deliveryChallanDto,String challanNo,InventoryEntranceDto inventoryEntranceDto,DispatcherLog dispatcherLog,BulkRequestResponseDto bulkRequestResponseDto, Principal principal)
+	{
+		logger.info("<--DispatchLogManagementServiceImpl-------------DeliveryChallanEntity--------------------started-->");
+		DeliveryChallanEntity deliveryChallanEntity=null;	 
+		
+		try {
+			deliveryChallanEntity=new DeliveryChallanEntity();
+			deliveryChallanEntity.setCode(deliveryChallanDto.getCode());
+			deliveryChallanEntity.setConsigneeAddress(deliveryChallanDto.getConsigneeAddress());
+			deliveryChallanEntity.setConsigneeName(deliveryChallanDto.getConsigneeName());
+			deliveryChallanEntity.setDcDate(deliveryChallanDto.getDcDate());
+			deliveryChallanEntity.setDelyChallan(deliveryChallanDto.getDelyChallan());
+			deliveryChallanEntity.setChallanNo(challanNo);
+			if(deliveryChallanDto.getDcDate()!=null)
+			{
+				deliveryChallanEntity.setDispatchDate(MasterDateUtil.convertStringToDateWithoutTime(deliveryChallanDto.getDcDate()));	
+			}
+			deliveryChallanEntity.setGstIn(deliveryChallanDto.getGstIn());
+			deliveryChallanEntity.setPlaceOfSupply(deliveryChallanDto.getPlaceOfSupply());
+			deliveryChallanEntity.setProductDescription(deliveryChallanDto.getProductDescription());
+			deliveryChallanEntity.setTransCompany(deliveryChallanDto.getTransCompany());
+			deliveryChallanEntity.setTransMode(deliveryChallanDto.getTransMode());
+			deliveryChallanEntity.setVehicleNo(deliveryChallanDto.getVehicleNo());
+			deliveryChallanEntity.setGstIn(deliveryChallanDto.getGstIn());
+			deliveryChallanEntity.setStatus(InventoryConstant.ITEM_DISPATCHED);
+			deliveryChallanEntity.setSubStatus(InventoryConstant.CHALLAN_GENERATED);
+			deliveryChallanEntity.setQuantity(inventoryEntranceDto.getAllocatableQuantity());
+			deliveryChallanEntity.setPurpose(inventoryEntranceDto.getPurpose());
+			deliveryChallanEntity.setIsOwnVehicle(deliveryChallanDto.getIsOwnVehicle());
+			if(inventoryEntranceDto.getPurpose().equals(InventoryConstant.MOVETOSCRAPREQUESTED))
+			{
+				deliveryChallanEntity.setReason(InventoryConstant.SCRAP);
+			}
+			else if(inventoryEntranceDto.getPurpose().equals(InventoryConstant.MOVETOSERVICEREQUESTED))
+			{
+				deliveryChallanEntity.setReason(InventoryConstant.SERVICE);
+				deliveryChallanEntity.setStatus(InventoryConstant.ITEM_RECEIVED);
+				deliveryChallanEntity.setSubStatus(InventoryConstant.CHALLAN_GENERATED);
+				mapDispatchLogToServiceEntity(inventoryEntranceDto, bulkRequestResponseDto,principal);
+			}
+			
+			else if(inventoryEntranceDto.getPurpose().equals(InventoryConstant.ASSIGN_TO_PROJECT))
+			{
+				deliveryChallanEntity.setReason(InventoryConstant.PROJECT);
+			}
+			else if(inventoryEntranceDto.getPurpose().equals(InventoryConstant.MOVETOWAREHOUSEREQUESTED))
+			{
+				deliveryChallanEntity.setReason(InventoryConstant.WAREHOUSE);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		logger.info("<--DispatchLogManagementServiceImpl-------------DeliveryChallanEntity--------------------Ended-->");
+		return deliveryChallanEntity;
+	}
+
+	@Override
+	public ResponseDto acceptInventoryByChallaNo(BulkRequestResponseDto bulkRequestResponseDto,Principal principal) {
+		logger.info("<--DispatchLogManagementServiceImpl-------------acceptInventoryByChallaNo--------------------started-->");
+		 int receivedQuantity=0;
+		ResponseDto responseDto=new ResponseDto();
+		List<DeliveryChallanEntity> deliveryChallanEntityMapperList=new ArrayList<>();
+		
+		List<ProjectDto> projectDtoList=inventoryManagementService.getCurrentUserProjectDtoList(principal);
+		
+		if(projectDtoList!=null && !projectDtoList.isEmpty())
+		{
+			for(int j=0;j<projectDtoList.size();j++)
+			{
+				ProjectDto projectDto=projectDtoList.get(j);
+				if(projectDto!=null)
+				//if(projectDto.getName()== bulkRequestResponseDto.getProjectName())
+				{
+					for(int i=0;i<bulkRequestResponseDto.getInventoryEntranceItemDto().size();i++)
+					{
+						deliveryChallanEntityMapperList=new ArrayList<>();
+						InventoryEntranceDto inventoryEntranceDto=bulkRequestResponseDto.getInventoryEntranceItemDto().get(i);
+						if(inventoryEntranceDto!=null &&  projectDto.getName().equals(inventoryEntranceDto.getRequestedTo()))
+						{
+							DispatcherLog dispatcherLog=dispatchLogRepository.findOne(inventoryEntranceDto.getId());
+							if(dispatcherLog!=null)
+							{
+								dispatcherLog.setStatus(InventoryConstant.ITEM_RECEIVED);
+								
+								
+								List<DeliveryChallanEntity> deliveryChallanEntitiesList=dispatcherLog.getDeliveryChallanEntityList();
+								int dbsize=deliveryChallanEntitiesList.size();
+								if(deliveryChallanEntitiesList!=null)
+									{
+									 receivedQuantity =dispatcherLog.getQuantityInTransferProcess();
+									for(int m=0;m<dbsize;m++)
+									{  
+										DeliveryChallanEntity deliveryChallanEntity=deliveryChallanEntitiesList.get(m);
+										if(deliveryChallanEntity!=null)
+										{
+											if(deliveryChallanEntity.getChallanNo()!=null && bulkRequestResponseDto.getChallanNo().equals(deliveryChallanEntity.getChallanNo()))
+											{
+												deliveryChallanEntity.setStatus(InventoryConstant.ITEM_RECEIVED);
+												receivedQuantity= receivedQuantity - deliveryChallanEntity.getQuantity();
+											} 
+											deliveryChallanEntityMapperList.add(deliveryChallanEntity);
+										}
+									}
+									//dispatcherLog.setQuantityInTransferProcess();
+									dispatcherLog.setDeliveryChallanEntityList(deliveryChallanEntityMapperList);
+									dispatchLogRepository.saveAndFlush(dispatcherLog);
+								}
+							}
+						}
+					}
+				}
+			}
+				for(int i=0;i<bulkRequestResponseDto.getInventoryEntranceItemDto().size();i++)
+				{
+					InventoryEntranceDto inventoryEntranceDto=bulkRequestResponseDto.getInventoryEntranceItemDto().get(i);
+					if(inventoryEntranceDto!=null)
+					{
+						if(inventoryEntranceDto.getPurpose().equals(InventoryConstant.ASSIGN_TO_PROJECT))
+						{
+							responseDto=mapDispatchLogToInventoryAssignEntity(inventoryEntranceDto,bulkRequestResponseDto,principal);
+						}
+					}
+				}	
+			//responseDto.setStatus(InventoryConstant.SUCCESS);
+		}
+		else{
+			//add for warehouse
+			List<WareHouseDto> wareHouseDtoList=userManagementService.getCurrentUserWareHouseDtoList(principal);
+			if(wareHouseDtoList!=null && !wareHouseDtoList.isEmpty())
+			{
+				for(int j=0;j<wareHouseDtoList.size();j++)
+				{
+					WareHouseDto warehouseDto=wareHouseDtoList.get(j);
+					if(warehouseDto!=null)
+					{
+						for(int i=0;i<bulkRequestResponseDto.getInventoryEntranceItemDto().size();i++)
+						{
+							deliveryChallanEntityMapperList=new ArrayList<>();
+							InventoryEntranceDto inventoryEntranceDto=bulkRequestResponseDto.getInventoryEntranceItemDto().get(i);
+							if(inventoryEntranceDto!=null && warehouseDto.getWareHouseName().equals(inventoryEntranceDto.getRequestedTo()))
+							{  
+								DispatcherLog dispatcherLog=dispatchLogRepository.findOne(inventoryEntranceDto.getId());
+								if(dispatcherLog!=null)
+								{ 
+									dispatcherLog.setStatus(InventoryConstant.ITEM_RECEIVED);
+									
+									List<DeliveryChallanEntity> deliveryChallanEntitiesList=dispatcherLog.getDeliveryChallanEntityList();
+									
+									 receivedQuantity =dispatcherLog.getQuantityInTransferProcess();
+									for(int m=0;m<deliveryChallanEntitiesList.size();m++)
+									{
+										DeliveryChallanEntity deliveryChallanEntity=deliveryChallanEntitiesList.get(m);
+										if(deliveryChallanEntity!=null)
+										{ receivedQuantity =dispatcherLog.getQuantityInTransferProcess();
+											if(deliveryChallanEntity.getChallanNo()!=null && bulkRequestResponseDto.getChallanNo().equals(deliveryChallanEntity.getChallanNo()))
+											{
+												deliveryChallanEntity.setStatus(InventoryConstant.ITEM_RECEIVED);
+												//deliveryChallanEntityMapperList.add(deliveryChallanEntity);
+												receivedQuantity= receivedQuantity - deliveryChallanEntity.getQuantity();
+											}
+											deliveryChallanEntityMapperList.add(deliveryChallanEntity);
+										}
+									}
+									//dispatcherLog.setQuantityInTransferProcess(receivedQuantity);
+									dispatcherLog.setDeliveryChallanEntityList(deliveryChallanEntityMapperList);
+									dispatchLogRepository.saveAndFlush(dispatcherLog);
+								}
+								/*dispatcherLog.setQuantityInTransferProcess(receivedQuantity);
+								dispatcherLog.setDeliveryChallanEntityList(deliveryChallanEntityMapperList);
+								dispatchLogRepository.saveAndFlush(dispatcherLog);*/
+								
+							}
+						}
+					}
+			     }	
+				List<WareHouseDto> wareHouseDtoList2=userManagementService.getCurrentUserWareHouseDtoList(principal);
+				
+				for(int j=0;j<wareHouseDtoList2.size();j++)
+				{
+					WareHouseDto warehouseDto=wareHouseDtoList2.get(j);
+					if(warehouseDto!=null)
+					{
+						for(int i=0;i<bulkRequestResponseDto.getInventoryEntranceItemDto().size();i++)
+						{
+							InventoryEntranceDto inventoryEntranceDto=bulkRequestResponseDto.getInventoryEntranceItemDto().get(i);
+							if(inventoryEntranceDto!=null && warehouseDto.getWareHouseName().equals(inventoryEntranceDto.getRequestedTo()))
+							{
+								if(inventoryEntranceDto.getPurpose().equals(InventoryConstant.MOVETOWAREHOUSEREQUESTED)){
+									responseDto=mapDispatchLogtoInventoryAssignForWareHouseMove(inventoryEntranceDto,warehouseDto,principal);
+								}
+								else if(inventoryEntranceDto.getPurpose().equals(InventoryConstant.MOVETOSERVICEREQUESTED))
+								{
+									responseDto=mapDispatchLogToServiceEntity(inventoryEntranceDto,bulkRequestResponseDto,principal);
+								}
+								
+								else if(inventoryEntranceDto.getPurpose().equals(InventoryConstant.MOVETOSCRAPREQUESTED))
+								{
+									responseDto=mapDispatchLogToScrapEntity(inventoryEntranceDto,bulkRequestResponseDto,principal);
+								}
+							}
+						}
+					}
+			     }
+			}
+			//responseDto.setStatus(InventoryConstant.SUCCESS);
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------acceptInventoryByChallaNo--------------------Ended-->");
+		return responseDto;
+	}
+
+	private ResponseDto mapDispatchLogtoInventoryAssignForWareHouseMove(InventoryEntranceDto inventoryEntranceDto,WareHouseDto warehouseDto,Principal principal) {
+		
+		ResponseDto responseDto=new ResponseDto();
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatchLogtoInventoryAssignForWareHouseMove--------------------Ended-->");
+		if(inventoryEntranceDto!=null && warehouseDto.getWareHouseName().equals(inventoryEntranceDto.getRequestedTo()))
+		{
+					
+					InventoryEntrance inventoryEntrance=inventoryStockRepository.findByInventoryNumberAndWareHouseSiteName(inventoryEntranceDto.getInventoryNumber(), warehouseDto.getWareHouseName());
+					if(inventoryEntrance!=null)
+					{
+						inventoryEntrance.setAvailableQuantity(inventoryEntrance.getAvailableQuantity()+inventoryEntranceDto.getQuantity());
+						inventoryStockRepository.saveAndFlush(inventoryEntrance);
+					}
+					else{
+						inventoryEntrance=new InventoryEntrance();
+						inventoryEntrance=inventoryStockRepository.findByInventoryNumber(inventoryEntranceDto.getInventoryNumber());
+						if(inventoryEntrance!=null)
+						{
+							InventoryEntrance inventoryEntrance2=new InventoryEntrance();
+							inventoryEntrance2.setAvailableQuantity(inventoryEntranceDto.getQuantity());
+							inventoryEntrance2.setAssetTracking(inventoryEntrance.getAssetTracking());
+							inventoryEntrance2.setWareHouseSiteName(inventoryEntranceDto.getRequestedTo());
+							inventoryEntrance2.setWarrantyExpiryDate(inventoryEntrance.getWarrantyExpiryDate());
+							inventoryEntrance2.setVehicleNumber(inventoryEntrance.getVehicleNumber());
+							inventoryEntrance2.setSupplierName(inventoryEntrance.getSupplierName());
+							inventoryEntrance2.setSubCategoryName(inventoryEntrance.getSubCategoryName());
+							inventoryEntrance2.setServiceDueDate(inventoryEntrance.getServiceDueDate());
+							inventoryEntrance2.setQuantity(inventoryEntranceDto.getQuantity());
+							inventoryEntrance2.setModelcode(inventoryEntrance.getModelcode());
+							inventoryEntrance2.setModelName(inventoryEntrance.getModelName());
+							inventoryEntrance2.setMakeName(inventoryEntrance.getMakeName());
+							inventoryEntrance2.setLocation(InventoryConstant.WAREHOUSE);
+							inventoryEntrance2.setLastModifiedBy(principal.getName());
+							inventoryEntrance2.setLastModifiedDate(new Date());
+							inventoryEntrance2.setPurchaseTotalCost(inventoryEntrance.getPurchaseTotalCost());
+							inventoryEntrance2.setPurchaseDate(inventoryEntrance.getPurchaseDate());
+							inventoryEntrance2.setManufacturerName(inventoryEntrance.getManufacturerName());
+							inventoryEntrance2.setCreationDate(inventoryEntrance.getCreationDate());
+							inventoryEntrance2.setIsWarrantyApplicable(inventoryEntrance.getIsWarrantyApplicable());
+							inventoryEntrance2.setInventoryNumber(inventoryManagementService.getInventoryNumber());
+							inventoryEntrance2.setAssetNo(inventoryEntrance.getInventoryNumber());
+							inventoryEntrance2.setCreated_By(inventoryEntrance.getCreated_By());
+							inventoryEntrance2.setSerialNumber(null);
+							if(inventoryEntrance.getCategory()!=null)
+							{
+								Category category=categoryRepository.findOne(inventoryEntrance.getCategory().getId());
+								inventoryEntrance2.setCategory(category);
+							}
+							if(inventoryEntrance.getSubCategory()!=null)
+							{
+								SubCategory subCategory=subCategoryRepository.findOne(inventoryEntrance.getSubCategory().getId());
+								inventoryEntrance2.setSubCategory(subCategory);
+							}
+							if(inventoryEntrance.getManufacturer()!=null)
+							{
+								Manufacturer manufacturer=manufacturerRepository.findOne(inventoryEntrance.getManufacturer().getId());
+								inventoryEntrance2.setManufacturer(manufacturer);
+							}
+							
+							if(inventoryEntrance.getSupplier()!=null)
+							{
+								Supplier supplier=supplierRepository.findOne(inventoryEntrance.getSupplier().getId());
+								inventoryEntrance2.setSupplier(supplier);
+							}
+							inventoryEntrance2=inventoryStockRepository.save(inventoryEntrance2);
+							if(inventoryEntrance2!=null)
+							{
+								responseDto.setStatus(InventoryConstant.MOVETOWAREHOUSEREQUESTED);
+							}
+						}
+					}
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatchLogtoInventoryAssignForWareHouseMove--------------------Ended-->");
+		return responseDto;
+	}
+
+	private ResponseDto mapDispatchLogToInventoryAssignEntity(InventoryEntranceDto inventoryEntranceDto,BulkRequestResponseDto bulkRequestResponseDto,Principal principal) {
+
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatchLogToInventoryAssignEntity--------------------started-->");
+		ResponseDto responseDto=new ResponseDto();
+		DispatcherLog dispatcherLog=dispatchLogRepository.findOne(inventoryEntranceDto.getId());
+		// here add quantity which is in deliverychallan entity not in dispatch log
+		for(int k=0;k<dispatcherLog.getDeliveryChallanEntityList().size();k++)
+		{
+			DeliveryChallanEntity deliveryChallanEntity=dispatcherLog.getDeliveryChallanEntityList().get(k);
+			
+			if(deliveryChallanEntity!=null)
+			{
+				if(deliveryChallanEntity.getChallanNo().equals(bulkRequestResponseDto.getChallanNo()))
+				{
+					InventoryAssign inventoryAssign=new InventoryAssign();
+					inventoryAssign.setAllocatedQty(deliveryChallanEntity.getQuantity());
+					inventoryAssign.setAvailableQty(deliveryChallanEntity.getQuantity());
+					inventoryAssign.setLeftoverQty(deliveryChallanEntity.getQuantity());
+					inventoryAssign.setAssignedLocation(dispatcherLog.getRequestedTo());
+					inventoryAssign.setCreatedBy(principal.getName());
+					inventoryAssign.setCreationDate(new Date());
+					inventoryAssign.setInperson(principal.getName());
+					inventoryAssign.setInventoryLocation(InventoryConstant.PROJECTSITE);
+					inventoryAssign.setInventoryNumber(dispatcherLog.getInventoryEntrance().getInventoryNumber());
+					inventoryAssign.setLastModifiedBy(principal.getName());
+					inventoryAssign.setLastModifiedDate(new Date());
+					inventoryAssign.setModelCode(dispatcherLog.getModelCode());
+					inventoryAssign.setSubCategoryName(dispatcherLog.getSubCategory().getSubCategory());
+					inventoryAssign.setWareHouseSiteName(dispatcherLog.getRequestedFrom());
+					Category category=categoryRepository.findOne(dispatcherLog.getCategory().getId());
+					if(category!=null)
+					{
+						inventoryAssign.setCategory(category);
+					}
+					
+					SubCategory subCategory=subCategoryRepository.findOne(dispatcherLog.getSubCategory().getId());
+					if(subCategory!=null)
+					{
+						inventoryAssign.setSubCategory(subCategory);
+					}
+					
+					InventoryEntrance inventoryEntrance=inventoryStockRepository.findOne(dispatcherLog.getInventoryEntrance().getId());
+					if(inventoryEntrance!=null)
+					{
+						inventoryAssign.setInventoryEntrance(inventoryEntrance);
+					}
+					inventoryAssign=inventoryAssignRepository.saveAndFlush(inventoryAssign);
+					if(inventoryAssign!=null)
+					{
+						responseDto.setStatus(InventoryConstant.ASSIGN_TO_PROJECT);
+					}
+				}
+			}
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatchLogToInventoryAssignEntity--------------------Ended-->");
+		return responseDto;
+	}
+
+	private ResponseDto mapDispatchLogToScrapEntity(InventoryEntranceDto inventoryEntranceDto,BulkRequestResponseDto bulkRequestResponseDto,Principal principal) {
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatchLogToScrapEntity--------------------Started-->");
+		ResponseDto responseDto=new ResponseDto();
+		DispatcherLog dispatcherLog=dispatchLogRepository.findOne(inventoryEntranceDto.getId());
+		for(int k=0;k<dispatcherLog.getDeliveryChallanEntityList().size();k++)
+		{
+			
+			DeliveryChallanEntity deliveryChallanEntity=dispatcherLog.getDeliveryChallanEntityList().get(k);
+			if(deliveryChallanEntity!=null)
+			{
+				Scrap scrap = new Scrap();
+				scrap.setFromLocation(dispatcherLog.getRequestedFrom());
+				scrap.setLastModifiedBy(principal.getName());
+				scrap.setLastModifiedDate(new Date());
+				scrap.setQuantity(deliveryChallanEntity.getQuantity());
+				scrap.setRaisedBy(dispatcherLog.getRaisedBy());
+				scrap.setRaisedDate(new Date());
+				scrap.setLevel1Approver(InventoryConstant.QC_APPROVED);
+				scrap.setLevel2Approver(InventoryConstant.QC_APPROVED);
+				scrap.setStatus(InventoryConstant.ACTIVE);
+				scrap.setWarehouseSiteName(dispatcherLog.getRequestedTo());
+				scrap.setInventoryNumber(dispatcherLog.getInventoryNumber());
+				scrap.setCategory(dispatcherLog.getCategory());
+				scrap.setSubCategory(dispatcherLog.getSubCategory());
+				scrap.setComments("");
+				if(dispatcherLog.getInventoryAssign()!=null)
+				{
+					scrap.setInventoryAssign(dispatcherLog.getInventoryAssign());	
+				}
+				scrap = scrapRepository.save(scrap);
+				if(scrap!=null)
+				{
+					responseDto.setStatus(InventoryConstant.MOVETOSCRAPREQUESTED);
+				}
+			}
+		}
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatchLogToScrapEntity--------------------Ended-->");
+		return responseDto;
+	}
+
+	private ResponseDto mapDispatchLogToServiceEntity(InventoryEntranceDto inventoryEntranceDto,BulkRequestResponseDto bulkRequestResponseDto,Principal principal) {
+        logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatchLogToServiceEntity--------------------Started-->");
+		ResponseDto responseDto=new ResponseDto();
+        DispatcherLog dispatcherLog=dispatchLogRepository.findOne(inventoryEntranceDto.getId());
+        
+        
+        if(inventoryEntranceDto.getPurpose().equals(InventoryConstant.MOVETOSERVICEREQUESTED)){
+        	
+        	ServiceTracker serviceTracker = new ServiceTracker();
+			serviceTracker.setComments(dispatcherLog.getComments());
+			serviceTracker.setCreatedBy(dispatcherLog.getRaisedBy());
+			serviceTracker.setCreationDate(new Date());
+			serviceTracker.setFromDate(new Date());
+			serviceTracker.setLastModifiedBy(principal.getName());
+			serviceTracker.setLastModifiedDate(new Date());
+			serviceTracker.setQuantity(dispatcherLog.getQuantity());
+			serviceTracker.setStatus(InventoryConstant.ACTIVE);
+			serviceTracker.setToDate(new Date());
+			//serviceTracker.setWorkingCondtion(serviceInspectionDto.getWorkingCondtion());
+			serviceTracker.setSerialNumber(dispatcherLog.getInventoryNumber());
+			serviceTracker.setCreationDate(new Date());
+			serviceTracker.setFromDate(new Date());
+			serviceTracker.setType("");
+			serviceTracker.setInventoryNumber(dispatcherLog.getInventoryNumber());
+			serviceTracker.setCategory(dispatcherLog.getCategory());
+			serviceTracker.setSubCategory(dispatcherLog.getSubCategory());
+			serviceTracker.setFromLocation(dispatcherLog.getRequestedFrom());
+			serviceTracker.setWarehouseSiteName(dispatcherLog.getRequestedTo());
+			serviceTracker.setWorkingCondtion("");
+			if(dispatcherLog.getInventoryAssign()!=null)
+			{
+				serviceTracker.setInventoryAssign(dispatcherLog.getInventoryAssign());	
+			}
+			serviceTracker = serviceTrackerRepository.save(serviceTracker);
+			if(serviceTracker!=null)
+			{
+				responseDto.setStatus(InventoryConstant.MOVETOSERVICEREQUESTED);
+			}
+        	
+        }else{
+    		for(int k=0;k<dispatcherLog.getDeliveryChallanEntityList().size();k++)
+    		{
+    			DeliveryChallanEntity deliveryChallanEntity=dispatcherLog.getDeliveryChallanEntityList().get(k);
+    			if(deliveryChallanEntity!=null)
+    			{
+    				ServiceTracker serviceTracker = new ServiceTracker();
+    				serviceTracker.setComments(dispatcherLog.getComments());
+    				serviceTracker.setCreatedBy(dispatcherLog.getRaisedBy());
+    				serviceTracker.setCreationDate(new Date());
+    				serviceTracker.setFromDate(new Date());
+    				serviceTracker.setLastModifiedBy(principal.getName());
+    				serviceTracker.setLastModifiedDate(new Date());
+    				serviceTracker.setQuantity(deliveryChallanEntity.getQuantity());
+    				serviceTracker.setStatus(InventoryConstant.ACTIVE);
+    				serviceTracker.setToDate(new Date());
+    				//serviceTracker.setWorkingCondtion(serviceInspectionDto.getWorkingCondtion());
+    				serviceTracker.setSerialNumber(dispatcherLog.getInventoryNumber());
+    				serviceTracker.setCreationDate(new Date());
+    				serviceTracker.setFromDate(new Date());
+    				serviceTracker.setType("");
+    				serviceTracker.setInventoryNumber(dispatcherLog.getInventoryNumber());
+    				serviceTracker.setCategory(dispatcherLog.getCategory());
+    				serviceTracker.setSubCategory(dispatcherLog.getSubCategory());
+    				serviceTracker.setFromLocation(dispatcherLog.getRequestedFrom());
+    				serviceTracker.setWarehouseSiteName(dispatcherLog.getRequestedTo());
+    				serviceTracker.setWorkingCondtion("");
+    				if(dispatcherLog.getInventoryAssign()!=null)
+    				{
+    					serviceTracker.setInventoryAssign(dispatcherLog.getInventoryAssign());	
+    				}
+    				serviceTracker = serviceTrackerRepository.save(serviceTracker);
+    				if(serviceTracker!=null)
+    				{
+    					responseDto.setStatus(InventoryConstant.MOVETOSERVICEREQUESTED);
+    				}
+    			}
+    		}
+        	
+        }
+		logger.info("<--DispatchLogManagementServiceImpl-------------mapDispatchLogToServiceEntity--------------------Ended-->");
+		return responseDto;
+	}
+	
+	
+	
+	
+	
+}

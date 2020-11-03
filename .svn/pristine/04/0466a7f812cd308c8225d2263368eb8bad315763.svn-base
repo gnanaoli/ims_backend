@@ -1,0 +1,281 @@
+ims.controller('ReportsController', function($scope,$http,InsertService,FetchService,DTOptionsBuilder,$filter) { 
+	
+	$scope.stock_report_view = false;
+	$scope.scrap_view = false;  
+	$scope.tools_Request_view = false;
+	$scope.Inventory_Service = false;
+	$scope.ELCB = false;
+	$scope.Workmen_details = false;
+	$scope.inventory_inwords_view= false;
+	$scope.inventory_outwords_view= false;
+	
+	$scope.reportDto ={};  
+	
+	$scope.reportDtoList=[];
+	$scope.projectList=[];
+	$scope.wareHouseEntityList=[];
+	$scope.listfinal=[];
+	
+	
+	
+	
+	
+	 
+	FetchService.getAllProjectList().then(function(response)
+			{
+		$scope.projectList=response;
+			});
+	
+	FetchService.getAllActiveWareHouse().then(function(response)
+			{
+		$scope.wareHouseEntityList=response;
+			});
+	
+	
+	$scope.search = function()
+	{  var count=0;
+	$scope.reportDtoList=[];
+		if ($scope.reportForm.$valid) 
+		{
+			$scope.listfinal=$scope.projectList.concat($scope.wareHouseEntityList);
+			
+			if($scope.reportDto.reportMenu  =='INVENTORY DETAILS' || $scope.reportDto.reportMenu == 'INVENTORY SCRAP' || $scope.reportDto.reportMenu == 'INVENTORY REQUESTS' || $scope.reportDto.reportMenu == 'INVENTORY SERVICE' || $scope.reportDto.reportMenu == 'INVENTORY INWORDS' || $scope.reportDto.reportMenu == 'INVENTORY OUTWORDS')
+				 
+			{
+				//alert(JSON.stringify($scope.listfinal));
+				//console.log("details given for report"+JSON.stringify($scope.reportDto));
+			angular.forEach($scope.listfinal,function(v,k){
+				if(v.selected)
+					{
+					count++;
+					}
+			});
+			if(count==0)
+				{
+				/*$scope.listfinal="please choose Project or wareHouse";
+				return false;*/
+				swal(
+	   		    		  '',
+	   			      'Please Choose Project or WareHouse',
+	   			      'warning'
+	   			    )
+	   			    return false;
+				}
+			$scope.listfinal='';
+			count=0;
+			}
+			else if($scope.reportDto.reportMenu =='ELCB' || $scope.reportDto.reportMenu =='WORKMEN DETAILS' )
+			{
+				//alert(JSON.stringify($scope.listfinal));
+			angular.forEach($scope.listfinal,function(v,k){
+				if(v.selected)
+					{
+					count++;
+					}
+			});
+			if(count==0)
+				{
+				/*$scope.listfinalError="please choose Projects";
+				return false;*/
+				swal(
+	   		    		  '',
+	   			      'Please Choose Project or WareHouse',
+	   			      'warning'
+	   			    )
+	   			    return false;
+				}
+			$scope.listfinalError='';
+			count=0;
+			}
+			
+			//$scope.reportDto['Roles'] =$scope.roleList;
+				
+			$scope.reportDto['projectItemDto'] =$scope.projectList;
+			$scope.reportDto['wareHouseDto']=$scope.wareHouseEntityList;
+		
+		console.log("reports Dto"+JSON.stringify($scope.reportDto));
+		
+			FetchService.getReport($scope.reportDto).then(function(response){
+				
+//				$scope.reportDto['projectItemDto'] =$scope.emtyList=[];
+//				$scope.reportDto['wareHouseDto']=$scope.emtyList=[];
+				
+				if($scope.reportDto.reportMenu == "INVENTORY DETAILS")
+					{
+					
+					$scope.scrap_view = false;  
+					$scope.tools_Request_view = false;
+					$scope.Inventory_Service = false;
+					$scope.ELCB = false;
+					$scope.Workmen_details = false;
+					$scope.stock_report_view= true;
+					$scope.inventory_inwords_view= false;
+					$scope.inventory_outwords_view= false;
+					}
+				if($scope.reportDto.reportMenu == "INVENTORY SCRAP")
+				{
+					$scope.stock_report_view = false;
+					
+					$scope.tools_Request_view = false;
+					$scope.Inventory_Service = false;
+					$scope.ELCB = false;
+					$scope.Workmen_details = false;
+				$scope.scrap_view = true;
+				$scope.inventory_inwords_view= false;
+				$scope.inventory_outwords_view= false;
+				}
+				if($scope.reportDto.reportMenu == "INVENTORY REQUESTS")
+				{
+					$scope.stock_report_view = false;
+					$scope.scrap_view = false;  
+					
+					$scope.Inventory_Service = false;
+					$scope.ELCB = false;
+					$scope.Workmen_details = false;
+				$scope.tools_Request_view = true;
+				$scope.inventory_inwords_view= false;
+				$scope.inventory_outwords_view= false;
+				}
+				if($scope.reportDto.reportMenu == "INVENTORY SERVICE")
+				{
+					$scope.stock_report_view = false;
+					$scope.scrap_view = false;  
+					$scope.tools_Request_view = false;
+					
+					$scope.ELCB = false;
+					$scope.Workmen_details = false;
+				$scope.Inventory_Service = true;
+				$scope.inventory_inwords_view= false;
+				$scope.inventory_outwords_view= false;
+				}
+				if($scope.reportDto.reportMenu == "ELCB")
+				{
+					$scope.stock_report_view = false;
+					$scope.scrap_view = false;  
+					$scope.tools_Request_view = false;
+					$scope.Inventory_Service = false;
+					
+					$scope.Workmen_details = false;
+				$scope.ELCB = true;
+				$scope.inventory_inwords_view= false;
+				$scope.inventory_outwords_view= false;
+				}
+				if($scope.reportDto.reportMenu == "WORKMEN DETAILS")
+				{
+					$scope.stock_report_view = false;
+					$scope.scrap_view = false;  
+					$scope.tools_Request_view = false;
+					$scope.Inventory_Service = false;
+					$scope.ELCB = false;
+					
+				$scope.Workmen_details = true;
+				$scope.inventory_inwords_view= false;
+				$scope.inventory_outwords_view= false;
+				}
+				if($scope.reportDto.reportMenu == "INVENTORY INWORDS")
+				{
+					
+					$scope.stock_report_view = false;
+					$scope.scrap_view = false;  
+					$scope.tools_Request_view = false;
+					$scope.Inventory_Service = false;
+					$scope.ELCB = false;
+					
+				$scope.Workmen_details = false;
+				$scope.inventory_inwords_view= true;
+				$scope.inventory_outwords_view= false;
+				}
+				if($scope.reportDto.reportMenu == "INVENTORY OUTWORDS")
+				{	
+					$scope.stock_report_view = false;
+					$scope.scrap_view = false;  
+					$scope.tools_Request_view = false;
+					$scope.Inventory_Service = false;
+					$scope.ELCB = false;
+					
+				$scope.Workmen_details = false;
+				$scope.inventory_inwords_view= false;
+				$scope.inventory_outwords_view= true;
+				}
+				
+				
+	    		//console.log("ReportsList"+JSON.stringify(response));
+	    		$scope.reportDtoList=response;
+	    		
+	    		
+	    		
+	    		 
+//	    		FetchService.getAllProjectList().then(function(response)
+//	    				{
+//	    			$scope.projectList=response;
+//	    				});
+//	    		
+//	    		FetchService.getAllActiveWareHouse().then(function(response)
+//	    				{
+//	    			$scope.wareHouseEntityList=response;
+//	    				});
+	    		
+	    	
+		});
+	}
+	}
+		
+		
+		
+//    $scope.dtOptions = DTOptionsBuilder.newOptions()
+//    .withDOM('<"top"lrf><"bottom"tip>').withLanguage({"sEmptyTable":"No Record Found"})
+//    .withButtons([            
+//    	{extend:'excel',text:'EXCEL'}
+//]);	
+    
+    
+    $scope.showDateFields=false;
+    	
+   /* $scope.isDateWiseSelected=function()
+	{
+    	 $scope.showDateFields=true;
+	}
+    $scope.isAllSelected=function()
+	{
+    	 $scope.showDateFields=false;
+	}*/
+    
+    $scope.validateToDate = function()
+	{
+    	
+    	var dateAr = $scope.reportDto.fromDate.split('-');
+    	var startDate = dateAr[2] + '-' + dateAr[1] + '-' + dateAr[0].slice(-2);
+    	
+    	var dateAr1 = $scope.reportDto.toDate.split('-');
+    	var endDate = dateAr1[2] + '-' + dateAr1[1] + '-' + dateAr1[0].slice(-2);
+	
+//		var startDate =   $filter('date')($scope.reportDto.fromDate, "dd-mm-yyyy");
+//		var endDate =   $filter('date')($scope.reportDto.toDate, "dd-mm-yyyy");
+		
+	
+		
+		if(startDate > endDate)
+			{
+			$scope.reportDto.toDate="";
+		}
+	
+	}
+    
+    $scope.dtOptions = DTOptionsBuilder.newOptions()
+    .withDOM('<"top"lrf><"bottom"tip>').withLanguage({"sEmptyTable":"No Record Found"})
+    .withButtons([            
+    	{extend: 'excel',
+        exportOptions: {
+           columns: ':visible:not(.not-export-col)'
+        }
+    	},
+    	{
+    	extend:'colvis'
+    	}
+]);
+
+  
+
+    
+	
+});

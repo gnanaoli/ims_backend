@@ -1,0 +1,322 @@
+package com.fa.inventory.service.impl;
+
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import com.fa.inventory.common.util.MasterDateUtil;
+import com.fa.inventory.constants.InventoryConstant;
+import com.fa.inventory.dto.ProjectDto;
+import com.fa.inventory.dto.ResponseDto;
+import com.fa.inventory.dto.ServiceInspectionDto;
+import com.fa.inventory.entity.DispatcherLog;
+import com.fa.inventory.entity.InventoryAssign;
+import com.fa.inventory.entity.InventoryEntrance;
+import com.fa.inventory.entity.ServiceInspection;
+import com.fa.inventory.entity.ServiceTracker;
+import com.fa.inventory.repository.DispatchLogRepository;
+import com.fa.inventory.repository.ServiceInspectionRepository;
+import com.fa.inventory.repository.ServiceTrackerRepository;
+import com.fa.inventory.service.InventoryManagementService;
+import com.fa.inventory.service.ServiceInpectionService;
+
+@Service
+public class ServiceInspectionImpl implements ServiceInpectionService {
+
+	protected final Logger logger = Logger.getLogger(ServiceTrackerServiceImpl.class);
+
+	@Resource
+	ServiceInspectionRepository serviceInspectionRepository;
+
+	@Resource
+	DispatchLogRepository dispatchLogRepository;
+
+	@Resource
+	ServiceTrackerRepository serviceTrackerRepository;
+
+	@Resource
+	InventoryManagementService inventoryManagementService;
+
+	@Override
+	public List<ServiceInspectionDto> getAllServiceInspection(Principal principal) throws Exception {
+
+		logger.info("<--ServiceInspectionImpl-------------getAllServiceInspection--------------------started-->");
+		List<ServiceInspectionDto> serviceInspectionDtoList = new ArrayList<>();
+		List<ProjectDto> projectsDtoList = null;
+
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		boolean hasUserRole = authentication.getAuthorities().stream()
+				.anyMatch(r -> r.getAuthority().equals(InventoryConstant.SUPER_USER)
+						|| r.getAuthority().equals(InventoryConstant.USER));
+		try {
+
+			// List<ServiceInspection> serviceInspectionsEntityList =
+			// serviceInspectionRepository.findAll();
+
+			if (hasUserRole) {
+				projectsDtoList = inventoryManagementService.getCurrentUserProjectDtoList(principal);
+
+				if (projectsDtoList != null) {
+					for (int j = 0; j < projectsDtoList.size(); j++) {
+						ProjectDto project = projectsDtoList.get(j);
+						if (project != null) {
+							List<ServiceInspection> serviceInspectionsEntityList = serviceInspectionRepository
+									.findByRequestedFrom(project.getName());
+
+							if (serviceInspectionsEntityList != null) {
+
+								for (int i = 0; i < serviceInspectionsEntityList.size(); i++) {
+
+									ServiceInspection serviceInspectionEntity = serviceInspectionsEntityList.get(i);
+
+									if (serviceInspectionEntity != null) {
+
+										if (serviceInspectionEntity.getStatus()
+												.equals(InventoryConstant.MOVETOSERVICEREQUESTED)) {
+											ServiceInspectionDto serviceInspectionDto = new ServiceInspectionDto();
+
+											serviceInspectionDto = mapServiceInspection(serviceInspectionDto, principal,
+													serviceInspectionEntity);
+											serviceInspectionDtoList.add(serviceInspectionDto);
+
+										}
+
+									}
+								}
+
+							}
+						}
+					}
+				}
+			} else {
+				List<ServiceInspection> serviceInspectionsEntityList = serviceInspectionRepository.findAll();
+
+				if (serviceInspectionsEntityList != null) {
+
+					for (int i = 0; i < serviceInspectionsEntityList.size(); i++) {
+
+						ServiceInspection serviceInspectionEntity = serviceInspectionsEntityList.get(i);
+
+						if (serviceInspectionEntity != null) {
+
+							if (serviceInspectionEntity.getStatus().equals(InventoryConstant.MOVETOSERVICEREQUESTED)) {
+								ServiceInspectionDto serviceInspectionDto = new ServiceInspectionDto();
+
+								serviceInspectionDto = mapServiceInspection(serviceInspectionDto, principal,
+										serviceInspectionEntity);
+								serviceInspectionDtoList.add(serviceInspectionDto);
+
+							}
+
+						}
+					}
+
+				}
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+		}
+
+		logger.info("<--ServiceInspectionImpl-------------getAllServiceInspection--------------------Ended-->");
+		return serviceInspectionDtoList;
+	}
+
+	@Override
+	public String VerifyandApproveServiceInspection(ServiceInspectionDto serviceInspectionDto, Principal principal) {
+
+		logger.info(
+				"<--ServiceInspectionImpl-------------VerifyandApproveServiceInspection--------------------Started-->");
+		String status = null;
+		ServiceInspection serviceInspection = new ServiceInspection();
+
+		serviceInspection = serviceInspectionRepository.findOne(serviceInspectionDto.getId());
+
+		if (serviceInspectionDto != null && serviceInspectionDto.getId() != null) {
+
+			if (serviceInspection != null
+					&& serviceInspectionDto.getSubStatus().equals(InventoryConstant.QC_VERIFIED)) {
+				serviceInspection.setSubStatus(serviceInspectionDto.getSubStatus());
+				serviceInspection.setComments(serviceInspectionDto.getComments());
+				serviceInspection.setActionBy(principal.getName());
+				serviceInspection = serviceInspectionRepository.save(serviceInspection);
+				if (serviceInspection != null) {
+					status = InventoryConstant.SUCCESS;
+				}
+			} else if (serviceInspection != null
+					&& serviceInspectionDto.getSubStatus().equals(InventoryConstant.QC_APPROVED)) {
+				if (serviceInspection.getChallanStatus().equals(InventoryConstant.YES)) {
+					DispatcherLog dispatcherLog = dispatchLogRepository
+							.save(mapDispatchLogEntity(serviceInspectionDto, principal, serviceInspection));
+					if (dispatcherLog != null) {
+						serviceInspection.setSubStatus(serviceInspectionDto.getSubStatus());
+						serviceInspection.setComments(serviceInspectionDto.getComments());
+						serviceInspection.setActionBy(principal.getName());
+
+						serviceInspection = serviceInspectionRepository.save(serviceInspection);
+
+						if (serviceInspection != null) {
+							status = InventoryConstant.SUCCESS;
+						}
+					}
+				} else if (serviceInspection.getChallanStatus().equals(InventoryConstant.NO)) {
+					if (serviceInspection.getStatus().equals(InventoryConstant.MOVETOSERVICEREQUESTED)) {
+						serviceTrackerRepository.saveAndFlush(
+								mapServiceTrackerEntity(serviceInspectionDto, principal, serviceInspection));
+					}
+					serviceInspection.setSubStatus(serviceInspectionDto.getSubStatus());
+					serviceInspection.setComments(serviceInspectionDto.getComments());
+					serviceInspection.setActionBy(principal.getName());
+					serviceInspection = serviceInspectionRepository.save(serviceInspection);
+					if (serviceInspection != null) {
+						status = InventoryConstant.SUCCESS;
+					}
+				}
+			} else {
+				serviceInspection.setSubStatus(serviceInspectionDto.getSubStatus());
+				serviceInspection.setComments(serviceInspectionDto.getComments());
+				serviceInspection.setActionBy(principal.getName());
+				if (serviceInspection.getInventoryAssign() != null) {
+					InventoryAssign inventoryAssign = serviceInspection.getInventoryAssign();
+					inventoryAssign
+							.setAvailableQty(inventoryAssign.getAvailableQty() + serviceInspection.getQuantity());
+					serviceInspection.setInventoryAssign(inventoryAssign);
+				}
+				if (serviceInspection.getInventoryEntrance() != null) {
+					InventoryEntrance inventoryEntrance = serviceInspection.getInventoryEntrance();
+					inventoryEntrance.setAvailableQuantity(
+							inventoryEntrance.getAvailableQuantity() + serviceInspection.getQuantity());
+					serviceInspection.setInventoryEntrance(inventoryEntrance);
+				}
+				serviceInspection = serviceInspectionRepository.save(serviceInspection);
+				if (serviceInspection != null) {
+					status = InventoryConstant.SUCCESS;
+				}
+			}
+
+		}
+
+		logger.info(
+				"<--ServiceInspectionImpl-------------VerifyandApproveServiceInspection--------------------Ended-->");
+		return status;
+	}
+
+	public DispatcherLog mapDispatchLogEntity(ServiceInspectionDto serviceInspectionDto, Principal principal,
+			ServiceInspection serviceInspection) {
+		logger.info("<--InventoryRequestServiceImpl-------------mapDispatchLogEntity--------------------started-->");
+		DispatcherLog dispatcherLog = new DispatcherLog();
+		dispatcherLog.setComments(serviceInspectionDto.getComments());
+		dispatcherLog.setLocation(serviceInspection.getLocation());
+		dispatcherLog.setModelCode(serviceInspection.getModelCode());
+		dispatcherLog.setQuantity(serviceInspection.getQuantity());
+		dispatcherLog.setRaisedBy(serviceInspection.getRaisedBy());
+		dispatcherLog.setActionBy(principal.getName());
+		dispatcherLog.setActionDate(new Date());
+		dispatcherLog.setAvailableQuantity(serviceInspection.getQuantity());
+		dispatcherLog.setAcceptedQuantity(serviceInspection.getQuantity());
+		dispatcherLog.setQuantityInTransferProcess(serviceInspection.getQuantity());
+		dispatcherLog.setDispatchedQuantity(0);
+		dispatcherLog.setDispatchDate(new Date());
+		dispatcherLog.setRequiredDays(0);
+		dispatcherLog.setRaisedDate(new Date());
+		dispatcherLog.setReferenceNo(serviceInspection.getReferenceNo());
+		dispatcherLog.setRequestedFrom(serviceInspection.getRequestedFrom());
+		dispatcherLog.setRequestedTo(serviceInspection.getRequestedTo());
+		dispatcherLog.setInventoryNumber(serviceInspection.getInventoryNumber());
+		if (serviceInspection.getChallanStatus().equals(InventoryConstant.YES)) {
+			dispatcherLog.setStatus(serviceInspection.getStatus());
+			dispatcherLog.setSubStatus(serviceInspectionDto.getSubStatus());
+		} else if (serviceInspection.getChallanStatus().equals(InventoryConstant.NO)) {
+			dispatcherLog.setStatus(InventoryConstant.ITEM_RECEIVED);
+			dispatcherLog.setSubStatus(InventoryConstant.CHALLAN_NOT_GENERATED);
+		}
+
+		dispatcherLog.setPurpose(InventoryConstant.MOVETOSERVICEREQUESTED);
+		dispatcherLog.setReason(InventoryConstant.SERVICE);
+		dispatcherLog.setCategory(serviceInspection.getCategory());
+		dispatcherLog.setSubCategory(serviceInspection.getSubCategory());
+		dispatcherLog.setInventoryAssign(serviceInspection.getInventoryAssign());
+		logger.info("<--InventoryRequestServiceImpl-------------mapDispatchLogEntity--------------------started-->");
+		return dispatcherLog;
+	}
+
+	public ServiceTracker mapServiceTrackerEntity(ServiceInspectionDto serviceInspectionDto, Principal principal,
+			ServiceInspection serviceInspection) {
+		logger.info("<--InventoryRequestServiceImpl-------------mapServiceTrackerEntity--------------------started-->");
+		ServiceTracker serviceTracker = new ServiceTracker();
+		serviceTracker.setComments(serviceInspectionDto.getComments());
+		serviceTracker.setCreatedBy(serviceInspection.getRaisedBy());
+		serviceTracker.setCreationDate(new Date());
+		serviceTracker.setFromDate(new Date());
+		serviceTracker.setLastModifiedBy(principal.getName());
+		serviceTracker.setLastModifiedDate(new Date());
+		serviceTracker.setQuantity(serviceInspection.getQuantity());
+		serviceTracker.setStatus(InventoryConstant.ACTIVE);
+		serviceTracker.setToDate(new Date());
+		serviceTracker.setWorkingCondtion(serviceInspectionDto.getWorkingCondtion());
+		serviceTracker.setSerialNumber(serviceInspection.getInventoryNumber());
+		serviceTracker.setCreationDate(new Date());
+		serviceTracker.setFromDate(new Date());
+		serviceTracker.setType("");
+		serviceTracker.setFromLocation(serviceInspection.getRequestedFrom());
+		serviceTracker.setWarehouseSiteName(serviceInspection.getRequestedTo());
+		serviceTracker.setInventoryNumber(serviceInspection.getInventoryNumber());
+		serviceTracker.setCategory(serviceInspection.getCategory());
+		serviceTracker.setSubCategory(serviceInspection.getSubCategory());
+		serviceTracker.setInventoryAssign(serviceInspection.getInventoryAssign());
+		logger.info("<--InventoryRequestServiceImpl-------------mapServiceTrackerEntity--------------------started-->");
+		return serviceTracker;
+	}
+
+	public ServiceInspectionDto mapServiceInspection(ServiceInspectionDto serviceInspectionDto, Principal principal,
+			ServiceInspection serviceInspectionEntity) throws Exception {
+
+		serviceInspectionDto.setId(serviceInspectionEntity.getId());
+		serviceInspectionDto.setAcceptedQuantity(serviceInspectionEntity.getAcceptedQuantity());
+		serviceInspectionDto.setActionBy(serviceInspectionEntity.getActionBy());
+		serviceInspectionDto.setActionDate(MasterDateUtil.convertDateToString(serviceInspectionEntity.getActionDate()));
+		serviceInspectionDto.setComments(serviceInspectionEntity.getComments());
+		serviceInspectionDto
+				.setDispatchDate(MasterDateUtil.convertDateToString(serviceInspectionEntity.getDispatchDate()));
+		serviceInspectionDto.setExpectedDateToReach(
+				MasterDateUtil.convertDateToString(serviceInspectionEntity.getExpectedDateToReach()));
+		serviceInspectionDto.setLocation(serviceInspectionEntity.getLocation());
+		serviceInspectionDto.setModelCode(serviceInspectionEntity.getModelCode());
+		serviceInspectionDto.setQuantity(serviceInspectionEntity.getQuantity());
+		serviceInspectionDto.setRaisedBy(serviceInspectionEntity.getRaisedBy());
+		serviceInspectionDto.setRaisedDate(MasterDateUtil.convertDateToString(serviceInspectionEntity.getRaisedDate()));
+		serviceInspectionDto.setReferenceNo(serviceInspectionEntity.getReferenceNo());
+		serviceInspectionDto.setRequestedTo(serviceInspectionEntity.getRequestedTo());
+		serviceInspectionDto.setRequiredDays(serviceInspectionEntity.getRequiredDays());
+		serviceInspectionDto.setStatus(serviceInspectionEntity.getStatus());
+		serviceInspectionDto.setSubStatus(serviceInspectionEntity.getSubStatus());
+		serviceInspectionDto.setRequestedFrom(serviceInspectionEntity.getRequestedFrom());
+
+		serviceInspectionDto.setCategoryType(serviceInspectionEntity.getCategory().getCategoryType());
+		serviceInspectionDto.setSubCategory(serviceInspectionEntity.getSubCategory().getSubCategory());
+		return serviceInspectionDto;
+
+	}
+
+	@Override
+	public ResponseDto receiveServiceTools(ServiceInspectionDto serviceInspectionDto, Principal principal,
+			HttpSession session) throws Exception {
+
+		ResponseDto responseDto = new ResponseDto();
+
+		return responseDto;
+	}
+
+}

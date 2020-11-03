@@ -1,0 +1,18 @@
+.table td{
+    padding: 0.50rem;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #e8ebf1;
+}
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: #fff;
+}
+.table-borderless td,
+.table-borderless th {
+    border: 1px solid #ddd;
+    color: #002060;
+    font-size: 14px;
+}
+table.dataTable{
+    border-collapse: collapse !important;
+}

@@ -1,0 +1,187 @@
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+	pageEncoding="ISO-8859-1"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="security"
+	uri="http://www.springframework.org/security/tags"%>
+<%@ page isELIgnored="false"%>
+<jsp:include page="header.jsp" />
+
+
+
+<!-- Container fluid  -->
+<!-- ============================================================== -->
+<div class="container-fluid user-top"
+	data-ng-controller="newUserController">
+	<!-- ============================================================== -->
+	<!-- Bread crumb and right sidebar toggle -->
+	<!-- ============================================================== -->
+	<div class="row page-titles">
+		<div class="col-md-5 align-self-center">
+			<h3 class="text-themecolor">USER MANAGEMENT</h3>
+		</div>
+
+
+	</div>
+	<!-- ============================================================== -->
+	<!-- End Bread crumb and right sidebar toggle -->
+	<!-- ============================================================== -->
+	<!-- ============================================================== -->
+	<!-- Start Page Content -->
+	<!-- ============================================================== -->
+	<!-- Row -->
+	<div class="form_section">
+		<div class="form-content create_form">
+			<h4 class="form_content_title">Create User</h4>
+			<form class="form-inline" name="NewUser" id="NewUser" novalidate>
+			
+			
+			<div class="row">
+				<div class="col-md-6 col_md text-center">
+				<div class="add_icon_asterisk">
+						<label for="email">Employee Id</label> 
+							<div class="new-select-option">
+								<select name="empid" id="empid"
+									data-ng-model="userDto.empid"
+									data-ng-change="getEmployeeDetails(userDto.empid)"
+									required class="select2 form-control"
+									style="width: 100%; height: 36px;">
+									<option value="" selected>--- SELECT COUNTRY ---</option> 
+									<option
+										data-ng-repeat="x in employeeIdDtoList track by x.employeeId"
+										value="{{x.employeeId}}">{{x.employeeId}}</option>
+								</select>
+								<i class="fa fa-asterisk" ></i>
+							</div>
+						<div data-ng-show="NewUser.$submitted || NewUser.empid.$touched" class="error_msg">
+						<div data-ng-show="NewUser.empid.$error.required" class="error_msg">Please choose employeeId</div>
+					    </div>
+					</div>
+					<!-- <div class="add_icon_asterisk"> -->
+					<div class="">
+						<label for="email">Name</label> <input type="text"
+							class="form-control" id="name" name="name"
+							data-ng-model="userDto.name"  readonly="readonly" autocomplete="off" >
+							<!--  class="fa fa-asterisk" ></i> -->
+					</div>
+					<!-- <div data-ng-show="NewUser.$submitted || NewUser.name.$touched" class="error_msg">
+						<div data-ng-show="NewUser.name.$error.required" class="error_msg">Please
+							Enter Name</div>
+					</div> -->
+					<div class="add_icon_asterisk">
+						<label for="email">User Name</label> <input type="text" 
+							class="normalstring" id="userName" name="userName" usernameonly
+							data-ng-model="userDto.userName" required autocomplete="off" maxlength="10">
+							<i class="fa fa-asterisk" ></i>
+					</div>
+					
+					<div data-ng-show="NewUser.$submitted || NewUser.userName.$touched" class="error_msg">
+						<div data-ng-show="NewUser.userName.$error.required" class="error_msg">Please
+							Enter User Name</div>
+					</div>
+					
+					<div class="add_icon_asterisk">
+						<label for="pwd">Password</label> <input type="text"
+							class="normalstring" id="password" name="password" passwordvalidation
+						disallow-spaces	data-ng-model="userDto.password" required autocomplete="off" maxlength="10">
+							<i class="fa fa-asterisk" ></i>
+					</div>
+					<div data-ng-show="NewUser.$submitted || NewUser.password.$touched" class="error_msg">
+						<div data-ng-show="NewUser.password.$error.required" class="error_msg">Please
+							Enter Password</div>
+					</div>
+					<div class="add_icon_asterisk">
+						<label for="pwd">Confirm Password</label> <input type="text"
+							class="normalstring" id="confirmPassword" name="confirmPassword" passwordvalidation
+							disallow-spaces data-ng-model="userDto.confirmPassword" required autocomplete="off" maxlength="10">
+							<i class="fa fa-asterisk" ></i>
+					</div>
+					<div data-ng-show="NewUser.$submitted || NewUser.confirmPassword.$touched" class="error_msg">
+						<div data-ng-show="NewUser.confirmPassword.$error.required" class="error_msg">Please
+							Enter Confirm Password</div>
+							<div data-ng-show="userDto.password.toString() != userDto.confirmPassword.toString()" class="error_msg">Password 
+							Does not Match</div>
+					</div>
+					<div class="add_icon_asterisk">
+						<label for="pwd">Role Type</label> <select
+							data-ng-model="userDto.roleType" name="roleType"
+							class="form-control"
+							data-ng-change="removeProjectAndWareHouseCheck(userDto.roleType)"
+							required>
+							<option value="">--select--</option>
+							<option data-ng-repeat="x in testRoleList" value="{{x.roleName}}">{{x.roleName}}</option>
+						</select>
+						<i class="fa fa-asterisk" ></i>
+					</div>
+					<div data-ng-show="NewUser.$submitted || NewUser.roleType.$touched" class="error_msg">
+						<div data-ng-show="NewUser.roleType.$error.required" class="error_msg">Please
+							choose roleType</div>
+					</div>
+				</div>
+
+				<div class="col-md-6">
+					<div class="" data-ng-if="userDto.roleType=='OTHERS'">
+						<label for="pwd">Projects:</label>
+						<div class="new-check-button">
+							<div data-ng-repeat="project in projectList">
+								<input type="checkbox" name="projectName"
+									id="projectName{{$index}}"
+									data-ng-model="projectList[$index].selected" class="filled-in">
+								<label for="projectName{{$index}}">{{project.name}}</label>
+							</div>
+							<div>
+								<p style="color: red">{{projectError}}</p>
+							</div>
+						</div>
+					</div>
+					<div class="" data-ng-if="userDto.roleType=='OTHERS'">
+						<label for="pwd">Roles:</label>
+						<div class="new-check-button">
+							<div data-ng-repeat="role in roleList">
+								<input type="checkbox" name="roleName" id="roleName{{$index}}"
+									data-ng-model="roleList[$index].selected" class="filled-in">
+								<label for="roleName{{$index}}">{{role.roleName}}</label>
+							</div>
+							<div>
+								<p style="color: red">{{roleError}}</p>
+							</div>
+						</div>
+					</div>
+					<div class=""
+						data-ng-if="userDto.roleType=='WAREHOUSE ADMINISTRATOR'">
+						<label for="pwd">WAREHOUSE:</label>
+
+						<div class="new-check-button">
+							<div data-ng-repeat="warehouse in wareHouseEntityList">
+								<input type="checkbox" name="wareHouseName"
+									id="wareHouseName{{$index}}"
+									data-ng-model="wareHouseEntityList[$index].selected"
+									class="filled-in"> <label for="wareHouseName{{$index}}">{{warehouse.wareHouseName}}</label>
+							</div>
+							<div>
+								<p style="color: red">{{wareHouseError}}</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				</div>
+				<div class="col-12 submit_col text-center">
+					<button class="btn btn-primary"
+						data-ng-click="saveUser($event,NewUser)"><i class="fa fa-check"></i> SAVE</button>
+					<span class="btn btn-warning" data-ng-click="cancel()"><i class="fa fa-close"></i> CANCEL</span>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Row -->
+<!-- ============================================================== -->
+
+
+
+
+
+
+
+<jsp:include page="footer.jsp" />

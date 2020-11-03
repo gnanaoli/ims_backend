@@ -1,0 +1,1128 @@
+package com.fa.inventory.controller;
+
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.fa.inventory.constants.InventoryConstant;
+import com.fa.inventory.dto.CategoryDto;
+import com.fa.inventory.dto.DepartmentDto;
+import com.fa.inventory.dto.DesignationDto;
+import com.fa.inventory.dto.FindToolsDto;
+import com.fa.inventory.dto.InventoryEntranceDto;
+import com.fa.inventory.dto.InventoryRequestDto;
+import com.fa.inventory.dto.ManufacturerDto;
+import com.fa.inventory.dto.ProjectDto;
+import com.fa.inventory.dto.ProjectsTasksDto;
+import com.fa.inventory.dto.ResponseDto;
+import com.fa.inventory.dto.SafetyStatusDto;
+import com.fa.inventory.dto.ServiceTrackerDto;
+import com.fa.inventory.dto.SubCategoryDto;
+import com.fa.inventory.dto.WareHouseDto;
+import com.fa.inventory.service.CategoryService;
+import com.fa.inventory.service.DeliveryChallanService;
+import com.fa.inventory.service.DepartmentService;
+import com.fa.inventory.service.DesignationService;
+import com.fa.inventory.service.InventoryManagementService;
+import com.fa.inventory.service.ManufacturerService;
+import com.fa.inventory.service.ProjectService;
+import com.fa.inventory.service.ProjectTypeService;
+import com.fa.inventory.service.ReportService;
+import com.fa.inventory.service.SafetyService;
+import com.fa.inventory.service.ServiceTrackerService;
+import com.fa.inventory.service.SubCategoryService;
+import com.fa.inventory.service.ToolsRequestService;
+import com.fa.inventory.service.UserManagementService;
+import com.fa.inventory.service.WareHouseService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@Controller
+public class InventoryController1 {
+
+	protected final Logger logger = Logger.getLogger(InventoryController1.class);
+
+	@Autowired
+	HttpSession session;
+
+	@Resource
+	CategoryService categoryService;
+
+	@Resource
+	ProjectService projectService;
+
+	@Resource
+	WareHouseService wareHouseService;
+
+	@Resource
+	ManufacturerService manufacturerService;
+
+	@Resource
+	InventoryManagementService inventoryManagementService;
+
+	@Resource
+	ToolsRequestService toolsRequestService;
+
+	@Resource
+	UserManagementService userManagementService;
+
+	@Resource
+	SubCategoryService subCategoryService;
+	@Resource
+	ReportService reportService;
+
+	@Resource
+	ProjectTypeService projectTypeService;
+
+	@Resource
+	DesignationService designationService;
+
+	@Resource
+	DepartmentService departmentService;
+
+	@Resource
+	SafetyService safetyService;
+
+	@Resource
+	DeliveryChallanService deliveryChallanService;
+
+	@Resource
+	ServiceTrackerService serviceTrackerService;
+
+	/* CATEGORY */
+	/* For Category Table */
+
+	@RequestMapping(value = "/CategoryManagement")
+	public ModelAndView CategoryList(HttpServletRequest request, HttpServletResponse response,
+			Authentication authentication, Principal principal, ModelMap map) {
+		logger.info("<--inventoryController1-------------CategoryManagement--------------------started-->");
+		ResponseDto responseDto = new ResponseDto();
+		List<CategoryDto> categoryDtoList = null;
+		ModelAndView model = new ModelAndView("CategoryManagement");
+		try {
+			categoryDtoList = new ArrayList<>();
+			categoryDtoList = categoryService.getCategoryList(principal);
+			responseDto.setResponseDtoList(categoryDtoList);
+			model.addObject("categoryList", responseDto);
+			System.out.println("authentication==>" + new ObjectMapper().writeValueAsString(authentication));
+			System.out.println("responseDto==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------CategoryManagement--------------------Ended-->");
+		return model;
+	}
+
+	/* For save the Category */
+
+	@RequestMapping(value = "/saveCategory", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> saveCategory(@RequestBody CategoryDto categoryDto, Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		String status = null;
+		try {
+			logger.info("<--inventoryController-------------saveCategory--------------------started-->");
+			System.out.println("saved CategoryDto RequestDto==>" + new ObjectMapper().writeValueAsString(categoryDto));
+			status = categoryService.saveCategory(categoryDto, principal);
+			if (status.equals("success")) {
+				responseDto.setStatus(status);
+				System.out.println("==>" + new ObjectMapper().writeValueAsString(responseDto));
+			}
+		} catch (Exception e) {
+			responseDto.setExceptionMessage(e.getMessage());
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController-------------saveCategory--------------------Ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* For Edit the Category */
+
+	/* FOR EDIT THE CATEGORY */
+
+	@RequestMapping(value = "/editCategory", method = RequestMethod.POST)
+	public ModelAndView editCategory(HttpServletRequest request, HttpServletResponse response, Principal principal)
+			throws Exception {
+		logger.info("Enter into inventoryController1 -- edit category => " + request.getParameter("id"));
+
+		ModelAndView model = null;
+
+		CategoryDto categoryDto = null;
+
+		try {
+			model = new ModelAndView("EditCategory");
+			System.out.println("id======>" + request.getParameter("id"));
+
+			if (request.getParameter("id") != null) {
+				categoryDto = categoryService.getCategory(request.getParameter("id"), principal);
+			}
+
+			System.out.println("categoryDto==>" + new ObjectMapper().writeValueAsString(categoryDto));
+
+			model.addObject("categoryDto", categoryDto);
+		} catch (Exception e) {
+			logger.error("Enter into inventoryController1 -- fetching values for edit category Request Failed", e);
+		}
+		logger.info(
+				"Exit into inventoryController1 -- fetched values for edit category => " + request.getParameter("id"));
+		return model;
+	}
+
+	/*
+	 * @RequestMapping(value = "/getCategory") public
+	 * ResponseEntity<ResponseDto> getGategory(HttpServletRequest request,
+	 * HttpServletResponse response,Principal principal) { logger.info(
+	 * "<--inventoryController1-------------getAllProject--------------------started-->"
+	 * ); ResponseDto responseDto=new ResponseDto(); CategoryDto
+	 * categoryDto=null; try { categoryDto=new CategoryDto();
+	 * categoryDto=categoryService.getCategory(request.getParameter("id"),
+	 * principal);; responseDto.setResponseDto(categoryDto);
+	 * System.out.println("responseDto==>"+new
+	 * ObjectMapper().writeValueAsString(responseDto)); } catch (Exception e) {
+	 * e.printStackTrace(); } logger.info(
+	 * "<--inventoryController1-------------getAllProject--------------------Ended-->"
+	 * ); return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK); }
+	 */
+
+	@RequestMapping(value = "/getAllProjectDtoList")
+	public ResponseEntity<ResponseDto> getAllProject(Principal principal) {
+		logger.info("<--inventoryController1-------------getAllProject--------------------started-->");
+		ResponseDto responseDto = new ResponseDto();
+		List<ProjectDto> projectDtoList = null;
+		try {
+			projectDtoList = new ArrayList<>();
+			projectDtoList = projectService.getprojectList(principal);
+			responseDto.setResponseDtoList(projectDtoList);
+			System.out.println("responseDto==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getAllProject--------------------Ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/saveProject", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> saveProject(@RequestBody ProjectDto ProjectDto, Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		String status = null;
+		logger.info("<--inventoryController1-------------saveProject--------------------started-->");
+		try {
+			System.out.println("request dto==>" + new ObjectMapper().writeValueAsString(ProjectDto));
+			status = projectService.saveProject(ProjectDto, principal);
+			/*
+			 * if(status.equals(InventoryConstant.SUCCESS)) {
+			 * responseDto.setStatus(InventoryConstant.SUCCESS); } else{
+			 * responseDto.setStatus(InventoryConstant.FAILURE); }
+			 * System.out.println("responseprojectDto==>"+new
+			 * ObjectMapper().writeValueAsString(ProjectDto)); } catch
+			 * (Exception e) { e.printStackTrace(); }
+			 */
+			if (status.equals("success")) {
+				responseDto.setStatus(status);
+				System.out.println("==>" + new ObjectMapper().writeValueAsString(responseDto));
+			}
+		} catch (Exception e) {
+			responseDto.setExceptionMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		logger.info("<--inventoryController1-------------saveProject--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/saveProjectTasks", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> saveProjectTasks(@RequestBody ProjectDto ProjectDto, Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		String status = null;
+		logger.info("<--inventoryController1-------------saveProjectTasks--------------------started-->");
+		try {
+			System.out.println("request dto==>" + new ObjectMapper().writeValueAsString(ProjectDto));
+			status = projectService.saveProjectTasks(ProjectDto, principal);
+
+			if (status.equals("success")) {
+				responseDto.setStatus(status);
+				System.out.println("==>" + new ObjectMapper().writeValueAsString(responseDto));
+			}
+		} catch (Exception e) {
+			responseDto.setExceptionMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		logger.info("<--inventoryController1-------------saveProjectTasks--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* For view the ProjectTasklist */
+
+	// @RequestMapping(value = "/viewTaskList",method=RequestMethod.POST)
+
+	@RequestMapping(value = "/viewProjectTaskList", method = RequestMethod.GET)
+	public ResponseEntity<ResponseDto> viewProjectTaskList(ProjectDto projectDto) {
+		ResponseDto responseDto = new ResponseDto();
+		logger.info("<--inventoryController1-------------viewProjectTaskList--------------------started-->");
+		try {
+			responseDto.setResponseDtoList(projectService.viewProjectTaskList(projectDto));
+			System.out.println("toolresponse==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getUserToolsRequest--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/EditManufacturer", method = RequestMethod.POST)
+	public ModelAndView EditManufacturer(HttpServletRequest request, HttpServletResponse response,
+			Principal principal) {
+		ManufacturerDto manufacturerDto = null;
+		ModelAndView model = new ModelAndView("EditManufacturer");
+		Long id = null;
+		logger.info("<--inventoryController-------------editManufacturer--------------------started-->");
+		try {
+			id = Long.valueOf(request.getParameter("id"));
+			manufacturerDto = manufacturerService.getManufacturer(id, principal);
+			System.out.println("==>" + new ObjectMapper().writeValueAsString(manufacturerDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		model.addObject("manufacturerDto", manufacturerDto);
+		logger.info("<--inventoryController-------------editCategory--------------------started-->");
+		return model;
+	}
+
+	/* FOR WAREHOUSE TABLE VALUE FETCHING */
+
+	@RequestMapping(value = "/getAllWareHouseDtoList")
+	public ResponseEntity<ResponseDto> getAllWareHouse(Principal principal) {
+		logger.info("<--inventoryController1-------------getAllWareHouse--------------------started-->");
+		ResponseDto responseDto = new ResponseDto();
+		List<WareHouseDto> wareHouseDtoList = null;
+		try {
+			wareHouseDtoList = new ArrayList<>();
+			wareHouseDtoList = wareHouseService.getwareHouseList(principal);
+			responseDto.setResponseDtoList(wareHouseDtoList);
+			System.out.println("wareHouseDtoList==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getAllWareHouse--------------------Ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR SAVE THE WARE HOUSE */
+	@RequestMapping(value = "/saveWareHouse", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> saveWareHouse(@RequestBody WareHouseDto wareHouseDto, Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		String status = null;
+		logger.info("<--inventoryController1-------------saveWareHouse--------------------started-->");
+		try {
+			System.out.println("request dto==>" + new ObjectMapper().writeValueAsString(wareHouseDto));
+			status = wareHouseService.saveWareHouse(wareHouseDto, principal);
+			if (status.equals("success")) {
+				responseDto.setStatus(status);
+				System.out.println("==>" + new ObjectMapper().writeValueAsString(responseDto));
+			}
+		} catch (Exception e) {
+			responseDto.setExceptionMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		logger.info("<--inventoryController1-------------saveWareHouse--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR EDIT THE WARE HOUSE */
+
+	@RequestMapping(value = "/editWareHouse", method = RequestMethod.POST)
+	public ModelAndView editWareHouse(HttpServletRequest request, HttpServletResponse response, Principal principal)
+			throws Exception {
+		logger.info("Enter into inventoryController1 -- edit ware House => " + request.getParameter("id"));
+
+		ModelAndView model = null;
+
+		WareHouseDto wareHouseDto = null;
+
+		try {
+			model = new ModelAndView("EditWareHouse");
+			System.out.println("id======>" + request.getParameter("id"));
+
+			wareHouseDto = wareHouseService.getWareHouse(Long.parseLong(request.getParameter("id")), principal);
+
+			System.out.println("warehouseDto==>" + new ObjectMapper().writeValueAsString(wareHouseDto));
+
+			model.addObject("wareHouseDto", wareHouseDto);
+		} catch (Exception e) {
+			logger.error("Enter into inventoryController1 -- fetching values for edit Request Failed", e);
+		}
+		logger.info("Exit into inventoryController1 -- fetched values for edit => " + request.getParameter("id"));
+		return model;
+	}
+
+	/* FOR ACTIVE WARE HOUSE DROP DOWN */
+
+	@RequestMapping(value = "/getAllActiveWareHouse")
+	public ResponseEntity<List<WareHouseDto>> getAllAciveWareHouse() {
+		logger.info("<--inventoryController3-------------getAllActiveWareHouse--------------------started-->");
+
+		List<WareHouseDto> wareHouseDtoList = new ArrayList<>();
+		try {
+			wareHouseDtoList = wareHouseService.getAllAciveWareHouse();
+			System.out.println("wareHouseDtoList==>" + new ObjectMapper().writeValueAsString(wareHouseDtoList));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController3-------------getAllActiveWareHouse--------------------started-->");
+		return new ResponseEntity<List<WareHouseDto>>(wareHouseDtoList, HttpStatus.OK);
+	}
+
+	/* FOR CATEGORY TABLE VALUE FETCHING */
+
+	@RequestMapping(value = "/getAllCategoryDtoList")
+	public ResponseEntity<ResponseDto> getAllCategory(Principal principal) {
+		logger.info("<--inventoryController1-------------getAllCategory--------------------started-->");
+		ResponseDto responseDto = new ResponseDto();
+		List<CategoryDto> categoryDtoList = null;
+		try {
+			categoryDtoList = new ArrayList<>();
+			categoryDtoList = categoryService.getCategoryList(principal);
+			responseDto.setResponseDtoList(categoryDtoList);
+			System.out.println("responseDto==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getAll Category--------------------Ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/getAllManufacturerDtoList")
+	public ResponseEntity<ResponseDto> getAllManufacturer(Principal principal) {
+		logger.info("<--inventoryController1-------------getAllManufacturer--------------------started-->");
+		ResponseDto responseDto = new ResponseDto();
+		List<ManufacturerDto> manufacturerDtoList = null;
+		try {
+			manufacturerDtoList = new ArrayList<>();
+			manufacturerDtoList = manufacturerService.getManufacturerDtoList(principal);
+			responseDto.setResponseDtoList(manufacturerDtoList);
+			System.out.println("getAllManufacturerDtoList==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getAllManufacturer--------------------Ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR SAVE THE MANUFACTURER */
+	@RequestMapping(value = "/saveManufacturer", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> saveManufacturer(@RequestBody ManufacturerDto manufacturerDto,
+			Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		String status = null;
+		logger.info("<--inventoryController1-------------saveManufacturer--------------------started-->");
+		try {
+			System.out.println("request dto==>" + new ObjectMapper().writeValueAsString(manufacturerDto));
+			status = manufacturerService.saveManufacturer(manufacturerDto, principal);
+			if (status.equals(InventoryConstant.SUCCESS)) {
+				responseDto.setStatus(InventoryConstant.SUCCESS);
+			}
+			System.out.println("responseCategoryDto==>" + new ObjectMapper().writeValueAsString(manufacturerDto));
+		} catch (Exception e) {
+			responseDto.setExceptionMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		logger.info("<--inventoryController1-------------saveManufacturer--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR EDIT THE MANUFACTURER */
+
+	@RequestMapping(value = "/editManufacturer", method = RequestMethod.POST)
+	public ModelAndView editManufacturer(HttpServletRequest request, HttpServletResponse response, Principal principal)
+			throws Exception {
+		logger.info("Enter into inventoryController1 --  edit Manufacturer => " + request.getParameter("id"));
+
+		ModelAndView model = null;
+
+		ManufacturerDto manufacturerDto = null;
+
+		try {
+			model = new ModelAndView("EditManufacturer");
+			System.out.println("id======>" + request.getParameter("id"));
+
+			manufacturerDto = manufacturerService.getManufacturer(Long.parseLong(request.getParameter("id")),
+					principal);
+
+			System.out.println("manufacturerDto==>" + new ObjectMapper().writeValueAsString(manufacturerDto));
+
+			model.addObject("manufacturerDto", manufacturerDto);
+		} catch (Exception e) {
+			logger.error("Enter into inventoryController1 -- fetching values for edit category Request Failed", e);
+		}
+		logger.info(
+				"Exit From inventoryController1 -- fetched values for edit category => " + request.getParameter("id"));
+		return model;
+	}
+
+	/* FOR ACTIVE MANUFACTURER DROP DOWN */
+
+	@RequestMapping(value = "/getAllActiveManufacturer")
+	public ResponseEntity<List<ManufacturerDto>> getAllAciveManufacturer() {
+		logger.info("<--inventoryController1-------------getAllAciveManufacturer--------------------started-->");
+
+		List<ManufacturerDto> manufacturerDtoList = new ArrayList<>();
+		try {
+			manufacturerDtoList = manufacturerService.getAllActiveManuFacturer();
+			System.out.println("manufacturerDtoList==>" + new ObjectMapper().writeValueAsString(manufacturerDtoList));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController3-------------getAllAciveWareHouse--------------------started-->");
+		return new ResponseEntity<List<ManufacturerDto>>(manufacturerDtoList, HttpStatus.OK);
+	}
+	/* FOR ACTIVE PROJECT TYPE DROP DOWN */
+
+	@RequestMapping(value = "/getAllActiveProjectTypes")
+	public ResponseEntity<List<ProjectDto>> getAllActiveProjectTypes() {
+		logger.info("<--inventoryController1-------------getAllActiveProjectTypes--------------------started-->");
+
+		List<ProjectDto> projectDtoList = new ArrayList<>();
+		try {
+			projectDtoList = projectService.getAllActiveProjectTypes();
+			System.out.println("Active Project TypeList==>" + new ObjectMapper().writeValueAsString(projectDtoList));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getAllActiveProjectTypes--------------------started-->");
+		return new ResponseEntity<List<ProjectDto>>(projectDtoList, HttpStatus.OK);
+	}
+
+	/* FOR ACTIVE PROJECT STATUS DROP DOWN */
+
+	@RequestMapping(value = "/getAllActiveProjectStatus")
+	public ResponseEntity<List<ProjectDto>> getAllActiveProjectStatus() {
+		logger.info("<--inventoryController1-------------getAllActiveProjectStatus--------------------started-->");
+
+		List<ProjectDto> projectDtoList = new ArrayList<>();
+		try {
+			projectDtoList = projectService.getAllActiveProjectStatus();
+			System.out.println("Active Project Status List==>" + new ObjectMapper().writeValueAsString(projectDtoList));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getAllActiveProjectTypes--------------------started-->");
+		return new ResponseEntity<List<ProjectDto>>(projectDtoList, HttpStatus.OK);
+	}
+
+	/* FOR VIEW THE INVENTORY REQUEST FROM INVENTORY REQUEST TABLE */
+	@RequestMapping(value = "/getUserToolsRequest", method = RequestMethod.GET)
+	public ResponseEntity<ResponseDto> getUserToolsRequest(Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		logger.info("<--inventoryController1-------------getUserToolsRequest--------------------started-->");
+		try {
+			responseDto.setResponseDtoList(toolsRequestService.getUserToolsRequest(principal));
+			System.out.println("toolresponse==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getUserToolsRequest--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR GET THE CURRENT USER ASSINGED PROJECT */
+	@RequestMapping(value = "/getCurrentUserProjectDropDown", method = RequestMethod.GET)
+	public ResponseEntity<ResponseDto> getCurrentUserProjectDropDown(Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		logger.info("<--inventoryController1-------------getCurrentUserProjectDropDown--------------------started-->");
+		try {
+			responseDto.setResponseDtoList(inventoryManagementService.getCurrentUserProjectDtoList(principal));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getCurrentUserProjectDropDown--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR GET THE CURRENT USER ASSINGED NON CLOSED PROJECT */
+	@RequestMapping(value = "/getcurrentusernonclosedprojectdropdown", method = RequestMethod.GET)
+	public ResponseEntity<ResponseDto> getcurrentusernonclosedprojectdropdown(Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		logger.info("<--inventoryController1-------------getCurrentUserProjectDropDown--------------------started-->");
+		try {
+			responseDto.setResponseDtoList(inventoryManagementService.getCurrentUserNonClosedProjectDtoList(principal));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getCurrentUserProjectDropDown--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR GET THE CURRENT USER ASSINGED WAREHOUSE */
+	@RequestMapping(value = "/getCurrentUserWareHouseDropDown", method = RequestMethod.GET)
+	public ResponseEntity<ResponseDto> getCurrentUserWareHouseDropDown(Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		logger.info(
+				"<--inventoryController1-------------getCurrentUserWareHouseDropDown--------------------started-->");
+		try {
+			responseDto.setResponseDtoList(userManagementService.getCurrentUserWareHouseDtoList(principal));
+			System.out.println("user warehouse response==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		/* console.log(JSON.stringify(responseDto)); */
+		logger.info("<--inventoryController1-------------getCurrentUserWareHouseDropDown-------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR SAVE THE TOOL REQUEST */
+	@RequestMapping(value = "/saveToolsRequest", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> saveToolsRequest(@RequestBody InventoryRequestDto inventoryRequestDto,
+			Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		String status = null;
+		logger.info("<--inventoryController1-------------saveToolsRequest--------------------started-->");
+		try {
+			System.out.println("request dto==>" + new ObjectMapper().writeValueAsString(inventoryRequestDto));
+//			status = toolsRequestService.saveToolsRequest(inventoryRequestDto, principal);
+			responseDto = toolsRequestService.saveToolsRequest(inventoryRequestDto, principal);
+//			if (status.equals(InventoryConstant.SUCCESS)) {
+//				responseDto.setStatus(InventoryConstant.SUCCESS);
+//			} else {
+//				responseDto.setStatus(InventoryConstant.FAILURE);
+//			}
+			System.out.println("responseDto==>" + new ObjectMapper().writeValueAsString(inventoryRequestDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		logger.info("<--inventoryController1-------------saveToolsRequest--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR REQUEST TOLLS */
+	@RequestMapping(value = "/RequestTools", method = RequestMethod.POST)
+	public ModelAndView RequestTools(HttpServletRequest request, HttpServletResponse response, Principal principal) {
+		InventoryEntranceDto inventoryEntranceDto = null;
+		ModelAndView model = new ModelAndView("RequestTools");
+		logger.info("<--inventoryController1-------------RequestTools--------------------started-->");
+
+		try {
+			/*
+			 * inventoryRequestDto.setCategory(request.getParameter(
+			 * "categoryType"));
+			 * inventoryRequestDto.setSubCategory(request.getParameter(
+			 * "subCategory"));
+			 * inventoryRequestDto.setModelCode(request.getParameter("modelCode"
+			 * )); if(null!=(request.getParameter("quantity"))); {
+			 * inventoryRequestDto.setQuantity(Integer.valueOf(request.
+			 * getParameter("quantity"))); }
+			 * 
+			 * inventoryRequestDto.setWareHouseSiteName(request.getParameter(
+			 * "site"));
+			 */
+			if (request.getParameter("id") != null) {
+				System.out.println("id" + request.getParameter("id"));
+				System.out.println("location" + request.getParameter("location"));
+				if (request.getParameter("location").equalsIgnoreCase(InventoryConstant.PROJECTSITE)) {
+					// inventoryAssignDto=new InventoryAssignDto();
+					inventoryEntranceDto = inventoryManagementService
+							.getInventoryFromAssignById(request.getParameter("id"), principal);
+				}
+
+				if (request.getParameter("location").equalsIgnoreCase(InventoryConstant.WAREHOUSE)) {
+					// inventoryEntranceDto=new InventoryEntranceDto();
+					inventoryEntranceDto = inventoryManagementService.getInventoryById(request.getParameter("id"),
+							principal);
+				}
+			}
+			System.out.println("RequestTools ==>" + new ObjectMapper().writeValueAsString(inventoryEntranceDto));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		model.addObject("inventoryEntranceDto", inventoryEntranceDto);
+		logger.info("<--inventoryController1-------------RequestTools--------------------Ended-->");
+		return model;
+	}
+
+	/* FOR VIEW TOOLS */
+
+	@RequestMapping(value = "/viewTools", method = RequestMethod.POST)
+	public ModelAndView viewTools(HttpServletRequest request, HttpServletResponse response, Principal principal)
+			throws Exception {
+		logger.info("Enter into inventoryController1 --  view Tools => " + request.getParameter("id"));
+
+		ModelAndView model = null;
+
+		CategoryDto categoryDto = null;
+
+		try {
+			model = new ModelAndView("ViewTools");
+			System.out.println("id======>" + request.getParameter("id"));
+
+			if (request.getParameter("id") != null) {
+				categoryDto = categoryService.getCategory(request.getParameter("id"), principal);
+			}
+
+			System.out.println("categoryDto==>" + new ObjectMapper().writeValueAsString(categoryDto));
+
+			model.addObject("categoryDto", categoryDto);
+		} catch (Exception e) {
+			logger.error("Enter into inventoryController1 -- fetching values for edit category Request Failed", e);
+		}
+		logger.info(
+				"Exit into inventoryController1 -- fetched values for edit category => " + request.getParameter("id"));
+		return model;
+	}
+
+	/* FOR FIND THE TOOLS FROM INVENTOY STOCK AND ASSIGN TABLE */
+	@RequestMapping(value = "/getAllToolsList", method = RequestMethod.POST)
+	public ResponseEntity<List<InventoryEntranceDto>> findtool(@RequestBody FindToolsDto findToolsDto,
+			Principal principal) {
+		List<InventoryEntranceDto> inventoryEntranceDto = new ArrayList<>();
+		try {
+			logger.info("<--inventoryController-------------findtool--------------------started-->");
+			System.out.println("findtool RequestDto==>" + new ObjectMapper().writeValueAsString(findToolsDto));
+			inventoryEntranceDto = inventoryManagementService.findtools(findToolsDto, principal);
+			System.out.println("==>" + new ObjectMapper().writeValueAsString(inventoryEntranceDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController-------------saveCategory--------------------Ended-->");
+		return new ResponseEntity<List<InventoryEntranceDto>>(inventoryEntranceDto, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/getToolsRequestById", method = RequestMethod.POST)
+	public ModelAndView getToolsRequestById(HttpServletRequest request, HttpServletResponse response,
+			Principal principal) {
+		ModelAndView model = new ModelAndView("AcceptToolsRequest");
+		String id = null;
+		InventoryRequestDto inventoryRequestDto = null;
+		logger.info("<--inventoryController1-------------getToolsRequestById--------------------started-->");
+		try {
+
+			id = request.getParameter("id");
+			inventoryRequestDto = toolsRequestService.getToolsRequestById(id, principal);
+			System.out.println("getInventoryById==>" + new ObjectMapper().writeValueAsString(inventoryRequestDto));
+			model.addObject("inventoryRequestDto", inventoryRequestDto);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getInventoryById--------------------started-->");
+		return model;
+	}
+
+	/* FOR SAVE THE ACCEPT TOOL REQUEST */
+	@RequestMapping(value = "/saveAcceptToolsRequest", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> saveAcceptToolsRequest(@RequestBody InventoryRequestDto inventoryRequestDto,
+			Principal principal, Authentication authentication) {
+		ResponseDto responseDto = new ResponseDto();
+//		String status = null;
+		logger.info("<--inventoryController1-------------saveAcceptToolsRequest--------------------started-->");
+		try {
+			System.out.println("request dto==>" + new ObjectMapper().writeValueAsString(inventoryRequestDto));
+
+			responseDto = toolsRequestService.saveAcceptToolsRequest(inventoryRequestDto, principal);
+			// status =
+			// toolsRequestService.saveAcceptToolsRequest(inventoryRequestDto,
+			// principal);
+			// if (status.equals(InventoryConstant.SUCCESS)) {
+			// responseDto.setStatus(InventoryConstant.SUCCESS);
+			// } else if (status.equals(InventoryConstant.REJECTED)) {
+			// responseDto.setStatus(InventoryConstant.REJECTED);
+			// }
+
+			System.out.println("responseDto==>" + new ObjectMapper().writeValueAsString(inventoryRequestDto));
+		} catch (Exception e) {
+			responseDto.setExceptionMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		logger.info("<--inventoryController1-------------saveAcceptToolsRequest--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/SubCategoryManagement")
+	public ResponseEntity<ResponseDto> SubCategoryList(HttpServletRequest request, HttpServletResponse response,
+			Authentication authentication, Principal principal, ModelMap map) {
+		logger.info("<--inventoryController1-------------SubCategoryManagement--------------------started-->");
+		ResponseDto responseDto = new ResponseDto();
+		List<SubCategoryDto> subCategoryDtoList = null;
+		try {
+			subCategoryDtoList = new ArrayList<>();
+			subCategoryDtoList = subCategoryService.getSubCategoryList(principal);
+			responseDto.setResponseDtoList(subCategoryDtoList);
+			System.out.println("subCategoryDtoList==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------SubCategoryManagement--------------------Ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR GENARATE THE INVENTORY REPORT */
+	@RequestMapping(value = "/getReport", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> getReport(@RequestBody InventoryEntranceDto reportDto, Principal principal) {
+		/*
+		 * String A= reportDto.getFromDate(); String B=reportDto.getToDate();
+		 * String fromDate=A+" 00:00:00"; String toDate=B+" 12:00:00";
+		 */
+		// (MasterDateUtil.convertStringToTimeStampDate(reportDto.getFromDate()));
+		// reportDto.setToDate(toDate);
+
+		ResponseDto responseDto = new ResponseDto();
+		try {
+			logger.info("<--inventoryController1-------------getReport--------------------started-->");
+			System.out.println("REPORT RequestDto==>" + new ObjectMapper().writeValueAsString(reportDto));
+
+			// inventoryEntranceDto=reportService.inventoryReport(reportsDto,principal);
+
+			List<String> projectAndWareHouseName = new ArrayList<>();
+
+			if (reportDto.getProjectItemDto() != null && !reportDto.getProjectItemDto().isEmpty()) {
+				List<ProjectDto> projectDtoList = new ArrayList<>();
+
+				projectDtoList = reportDto.getProjectItemDto();
+				if (projectDtoList != null) {
+
+					for (int k = 0; k < projectDtoList.size(); k++) {
+						ProjectDto projectDto = reportDto.getProjectItemDto().get(k);
+						if (projectDto != null && null != projectDto.getSelected()) {
+
+							projectAndWareHouseName.add(projectDto.getName());
+						}
+					}
+				}
+			}
+			if (reportDto.getWareHouseDto() != null && !reportDto.getWareHouseDto().isEmpty()) {
+				List<WareHouseDto> warehouseDtoList = new ArrayList<>();
+
+				warehouseDtoList = reportDto.getWareHouseDto();
+				if (warehouseDtoList != null) {
+
+					for (int k = 0; k < warehouseDtoList.size(); k++) {
+						WareHouseDto wareHouseDto = reportDto.getWareHouseDto().get(k);
+						if (wareHouseDto != null && null != wareHouseDto.getSelected()) {
+
+							projectAndWareHouseName.add(wareHouseDto.getWareHouseName());
+						}
+					}
+				}
+			}
+
+			if (reportDto.getReportMenu().equals(InventoryConstant.INVENTORY_REPORT)) {
+				responseDto.setResponseDtoList(
+						reportService.inventoryReport(reportDto, projectAndWareHouseName, principal));
+			} else if (reportDto.getReportMenu().equals(InventoryConstant.SCRAP_REPORT)) {
+				responseDto
+						.setResponseDtoList(reportService.scrapReport(reportDto, projectAndWareHouseName, principal));
+			} else if (reportDto.getReportMenu().equals(InventoryConstant.REQUESTS_REPORT)) {
+				responseDto.setResponseDtoList(
+						reportService.requestsReport(reportDto, projectAndWareHouseName, principal));
+			} else if (reportDto.getReportMenu().equals(InventoryConstant.SERVICE_REPORT)) {
+				responseDto
+						.setResponseDtoList(reportService.serviceReport(reportDto, projectAndWareHouseName, principal));
+			} else if (reportDto.getReportMenu().equals(InventoryConstant.ELCB_REPORT)) {
+				responseDto.setResponseDtoList(reportService.elcbReport(reportDto, projectAndWareHouseName, principal));
+			} else if (reportDto.getReportMenu().equals(InventoryConstant.WORKMEN_DETAILS_REPORT)) {
+				responseDto.setResponseDtoList(
+						reportService.worksMenDetailsReport(reportDto, projectAndWareHouseName, principal));
+			} else if (reportDto.getReportMenu().equals(InventoryConstant.INVENTORY_INWORDS)) {
+				responseDto.setResponseDtoList(
+						reportService.inventoryInwordsReport(reportDto, projectAndWareHouseName, principal));
+			} else if (reportDto.getReportMenu().equals(InventoryConstant.INVENTORY_OUTWORDS)) {
+				responseDto.setResponseDtoList(
+						reportService.inventoryOutwordsReport(reportDto, projectAndWareHouseName, principal));
+			}
+
+			System.out.println("ReportResponseDto==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getReport--------------------Ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR GET THE HISTORY OF PARTICULAR TASK */
+	@RequestMapping(value = "/getallhistoryoftask", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> getallhistoryoftask(@RequestBody ProjectsTasksDto projectsTaskDto,
+			Principal principal) {
+
+		ResponseDto responseDto = new ResponseDto();
+		try {
+			logger.info("<--inventoryController1-------------getReport--------------------started-->");
+			System.out.println("REPORT RequestDto==>" + new ObjectMapper().writeValueAsString(projectsTaskDto));
+			// inventoryEntranceDto=reportService.inventoryReport(reportsDto,principal);
+			responseDto.setResponseDtoList(projectService.getallhistoryoftask(projectsTaskDto, principal));
+
+			System.out.println("ReportResponseDto==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getReport--------------------Ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* PROJECT TYPE TABLE */
+	/* For ProjectType Table and Edit */
+
+	@RequestMapping(value = "/getAllProjectType")
+	public ResponseEntity<ResponseDto> getAllProjectType(Principal principal) {
+		logger.info("<--inventoryController-------------getAllProjectType--------------------started-->");
+		ResponseDto responseDto = new ResponseDto();
+		List<ProjectDto> projectTypeDtoList = null;
+		try {
+			projectTypeDtoList = new ArrayList<>();
+			projectTypeDtoList = projectTypeService.getAllProjectType(principal);
+			responseDto.setResponseDtoList(projectTypeDtoList);
+			System.out.println("projectTypeDtoList==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController-------------getAllProjectType--------------------Ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR SAVE THE PROJECT TYPE */
+	@RequestMapping(value = "/saveProjectType", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> saveProjectType(@RequestBody ProjectDto projectDto, Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		String status = null;
+		logger.info("<--inventoryController1-------------saveProjectType--------------------started-->");
+		try {
+			System.out.println("request dto==>" + new ObjectMapper().writeValueAsString(projectDto));
+			status = projectTypeService.saveProjectType(projectDto, principal);
+			if (status.equals(InventoryConstant.SUCCESS)) {
+				responseDto.setStatus(InventoryConstant.SUCCESS);
+			}
+
+			System.out.println("responseWareHouseDto==>" + new ObjectMapper().writeValueAsString(projectDto));
+		} catch (Exception e) {
+			responseDto.setExceptionMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		logger.info("<--inventoryController1-------------saveProjectType--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* PROJECT STATUS TABLE */
+	/* For ProjectStatus Table and Edit */
+
+	@RequestMapping(value = "/getAllProjectStatus")
+	public ResponseEntity<ResponseDto> getAllProjectStatus(Principal principal) {
+		logger.info("<--inventoryController-------------getAllProjectType--------------------started-->");
+		ResponseDto responseDto = new ResponseDto();
+		List<ProjectDto> projectTypeDtoList = null;
+		try {
+			projectTypeDtoList = new ArrayList<>();
+			projectTypeDtoList = projectService.getAllProjectStatus(principal);
+			responseDto.setResponseDtoList(projectTypeDtoList);
+			System.out.println("projectTypeDtoList==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController-------------getAllProjectType--------------------Ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR SAVE THE PROJECT STATUS */
+	@RequestMapping(value = "/saveProjectStatus", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> saveProjectStatus(@RequestBody ProjectDto projectDto, Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		String status = null;
+		logger.info("<--inventoryController1-------------saveProjectStatus--------------------started-->");
+		try {
+			System.out.println("request dto==>" + new ObjectMapper().writeValueAsString(projectDto));
+			status = projectService.saveProjectStatus(projectDto, principal);
+			if (status.equals(InventoryConstant.SUCCESS)) {
+				responseDto.setStatus(InventoryConstant.SUCCESS);
+			}
+
+			System.out.println("responseWareHouseDto==>" + new ObjectMapper().writeValueAsString(projectDto));
+		} catch (Exception e) {
+			responseDto.setExceptionMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		logger.info("<--inventoryController1-------------saveProjectStatus--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR SAVE THE DESIGNATION */
+	@RequestMapping(value = "/saveDesignation", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> saveDesignation(@RequestBody DesignationDto designationDto,
+			Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		String status = null;
+		logger.info("<--inventoryController1-------------saveDesignation--------------------started-->");
+		try {
+			System.out.println("request dto==>" + new ObjectMapper().writeValueAsString(designationDto));
+			status = designationService.saveDesignation(designationDto, principal);
+			if (status.equals(InventoryConstant.SUCCESS)) {
+				responseDto.setStatus(InventoryConstant.SUCCESS);
+			}
+
+			System.out.println("responseDesignationDto==>" + new ObjectMapper().writeValueAsString(designationDto));
+		} catch (Exception e) {
+			responseDto.setExceptionMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		logger.info("<--inventoryController1-------------saveDesignation--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR SAVE THE DEPARTMENT */
+	@RequestMapping(value = "/saveDepartment", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> saveDepartment(@RequestBody DepartmentDto departmentDto, Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		String status = null;
+		logger.info("<--inventoryController1-------------saveDepartment--------------------started-->");
+		try {
+			System.out.println("request dto==>" + new ObjectMapper().writeValueAsString(departmentDto));
+			status = departmentService.saveDepartment(departmentDto, principal);
+			if (status.equals(InventoryConstant.SUCCESS)) {
+				responseDto.setStatus(InventoryConstant.SUCCESS);
+			}
+
+			System.out.println("responseDepartmentDto==>" + new ObjectMapper().writeValueAsString(departmentDto));
+		} catch (Exception e) {
+			responseDto.setExceptionMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		logger.info("<--inventoryController1-------------saveDepartment--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR SAVE THE SafetyStatus */
+	@RequestMapping(value = "/saveSafetyStatus", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> saveSafetyStatus(@RequestBody SafetyStatusDto safetyStatusDto,
+			Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		String status = null;
+		logger.info("<--inventoryController1-------------saveSafetyStatus--------------------started-->");
+		try {
+			System.out.println("request dto==>" + new ObjectMapper().writeValueAsString(safetyStatusDto));
+			status = safetyService.saveSafetyStatus(safetyStatusDto, principal);
+			if (status.equals(InventoryConstant.SUCCESS)) {
+				responseDto.setStatus(InventoryConstant.SUCCESS);
+			}
+
+			System.out.println("responseSafetyStatusDto==>" + new ObjectMapper().writeValueAsString(safetyStatusDto));
+		} catch (Exception e) {
+			responseDto.setExceptionMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		logger.info("<--inventoryController1-------------saveSafetyStatus--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR GET AllDeliveryChallan */
+	@RequestMapping(value = "/getAllDeliveryChallan", method = RequestMethod.POST)
+	public ResponseEntity<ResponseDto> getalldeliverychallan(@RequestBody InventoryEntranceDto reportDto,
+			Principal principal) {
+		/*
+		 * String A= reportDto.getFromDate(); String B=reportDto.getToDate();
+		 * String fromDate=A+" 00:00:00"; String toDate=B+" 12:00:00";
+		 */
+		// (MasterDateUtil.convertStringToTimeStampDate(reportDto.getFromDate()));
+		// reportDto.setToDate(toDate);
+		ResponseDto responseDto = new ResponseDto();
+		try {
+			logger.info("<--inventoryController1-------------getAllDeliveryChallan--------------------started-->");
+			System.out.println("REPORT RequestDto==>" + new ObjectMapper().writeValueAsString(reportDto));
+			// inventoryEntranceDto=reportService.inventoryReport(reportsDto,principal);
+
+			responseDto.setResponseDtoList(deliveryChallanService.getalldeliverychallan(reportDto, principal));
+
+			System.out.println("ReportResponseDto==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getAllDeliveryChallan--------------------Ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/* FOR VIEW THE INVENTORY SERVICE FROM INVENTORY SERVICE TABLE */
+	@RequestMapping(value = "/getAllService", method = RequestMethod.GET)
+	public ResponseEntity<ResponseDto> getAllService(Principal principal) {
+		ResponseDto responseDto = new ResponseDto();
+		logger.info("<--inventoryController1-------------getAllService--------------------started-->");
+		try {
+			responseDto.setResponseDtoList(serviceTrackerService.getAllService(principal));
+			System.out.println("toolresponse==>" + new ObjectMapper().writeValueAsString(responseDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("<--inventoryController1-------------getAllService--------------------ended-->");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+	}
+
+	/*
+	 * SAVE FROM NEED CHALLAN
+	 * 
+	 * @RequestMapping(value="/saveNeedChallan",method = RequestMethod.POST)
+	 * public ResponseEntity<ResponseDto> saveAcceptToolsRequest(@RequestBody
+	 * InventoryRequestDto inventoryRequestDto,Principal
+	 * principal,Authentication authentication) { ResponseDto responseDto=new
+	 * ResponseDto(); String status=null; logger.info(
+	 * "<--inventoryController1-------------saveAcceptToolsRequest--------------------started-->"
+	 * ); try { System.out.println("request dto==>"+new
+	 * ObjectMapper().writeValueAsString(inventoryRequestDto));
+	 * 
+	 * status=toolsRequestService.saveAcceptToolsRequest(inventoryRequestDto,
+	 * principal); if(status.equals(InventoryConstant.SUCCESS)) {
+	 * responseDto.setStatus(InventoryConstant.SUCCESS); }
+	 * 
+	 * System.out.println("responseDto==>"+new
+	 * ObjectMapper().writeValueAsString(inventoryRequestDto)); } catch
+	 * (Exception e) { responseDto.setExceptionMessage(e.getMessage());
+	 * e.printStackTrace(); }
+	 * 
+	 * logger.info(
+	 * "<--inventoryController1-------------saveAcceptToolsRequest--------------------ended-->"
+	 * ); return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK); }
+	 */
+	/*
+	 * @RequestMapping(value = "/moveBackServiedTools", method =
+	 * RequestMethod.GET) public String sayHelloAgain(ModelMap model) {
+	 * model.addAttribute("greeting", "Hello World Again, from Spring 4 MVC");
+	 * return "MovedServiedTools.jsp"; }
+	 */
+
+	@RequestMapping(value = "/moveBackServiedTools", method = RequestMethod.POST)
+	public ModelAndView moveBackServiedTools(HttpServletRequest request, HttpServletResponse response,
+			Principal principal) {
+		ServiceTrackerDto serviceTrackerDto = null;
+		ModelAndView model = new ModelAndView("MoveBackServiedTools");
+		Long id = null;
+		logger.info("<--inventoryController-------------moveBackServiedTools--------------------started-->");
+		try {
+			id = Long.valueOf(request.getParameter("id"));
+			serviceTrackerDto = serviceTrackerService.findOne(id, principal);
+			System.out.println("==>" + new ObjectMapper().writeValueAsString(serviceTrackerDto));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		model.addObject("serviceTrackerDto", serviceTrackerDto);
+		logger.info("<--inventoryController-------------moveBackServiedTools--------------------ended-->");
+		return model;
+	}
+
+}

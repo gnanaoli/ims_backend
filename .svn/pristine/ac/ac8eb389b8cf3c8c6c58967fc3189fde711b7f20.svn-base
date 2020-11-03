@@ -1,0 +1,304 @@
+ <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="security" uri="http://www.springframework.org/security/tags" %>
+    <%@ page isELIgnored="false" %>
+<jsp:include page="header.jsp" />
+
+
+
+            <!-- Container fluid  -->
+            <!-- ============================================================== -->
+            <div class="container-fluid user-top" data-ng-controller="subCategoryManagementController">
+                <!-- ============================================================== -->
+                <!-- Bread crumb and right sidebar toggle -->
+                <!-- ============================================================== -->
+                <div class="row page-titles">
+                    <div class="col-md-5 align-self-center">
+                        <h3 class="text-themecolor">SUB CATEGORY</h3>
+                    </div>
+                    
+                   <div class="col-md-7 align-self-center">
+                   
+                   <div data-ng-show="subCategoryMgt">
+                   
+                        <ol class="breadcrumb">
+                        <li>
+                       
+                        <!-- <ol class="breadcrumb"> -->
+                         <security:authorize access="hasAuthority('OFFICE ADMINISTRATOR')">
+                            <a class="btn btn-primary waves-effect waves-light" href="" data-ng-click="newSubCategory()" >Add SubCategory</a>
+                            </security:authorize>
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    
+                    </div>
+
+                </div>
+                <!-- ============================================================== -->
+                <!-- End Bread crumb and right sidebar toggle -->
+                <!-- ============================================================== -->
+                <!-- ============================================================== -->
+                <!-- Start Page Content -->
+                <!-- ============================================================== -->
+                <!-- Row -->
+                
+                
+                <div data-ng-show="subCategoryMgt">
+                
+                
+		<div class="form_section">
+
+			<div class="form-content">
+				<h4 class="form_content_title">Search  Sub Category</h4>
+
+<div class="table-responsive">
+				<table datatable="ng" dt-options="dtOptions"
+					class="table table-striped table-bordered">
+					<thead>
+					<tr>
+						<th>category Code</th>
+						<th>category Type</th>
+						<th>subCategory</th>
+						<th>model</th>
+						<th>HSn Code</th>
+						<th>Status </th>
+						<th class="not-export-col">Action </th>
+						
+					</tr>
+					</thead>
+					<tbody>
+						<tr data-ng-repeat="subCategoryDto in subCategoryDtoList">
+							<td>{{subCategoryDto.categoryDto.categoryCode}}</td>
+							<td>{{subCategoryDto.categoryDto.categoryType}}</td>
+							<td>{{subCategoryDto.subCategory}}</td>
+							<td>{{subCategoryDto.model}}</td>
+							<td>{{subCategoryDto.hsnCode}}</td>
+							<td>{{subCategoryDto.status}}</td>
+							
+						        
+							<td class="table_btn_group">
+							<security:authorize access="hasAuthority('OFFICE ADMINISTRATOR')"><a href="" class="btn btn-primary" data-ng-click="edit(subCategoryDto)"><i class="fa fa-edit"></i> Edit</a>
+							</security:authorize>
+							<a href="" data-ng-click="view(subCategoryDto)" class="btn btn-primary"><i class="fa fa-drivers-license-o"></i> View</a> </td>
+							
+						</tr>
+					</tbody>
+				</table>
+</div>
+
+
+
+			</div>
+		</div>
+		</div>
+		
+		
+		
+		
+		
+		
+		<div data-ng-show="editSubCategory">
+		
+		
+							<div class="form_section">
+							<div class="form-content create_form">
+								<h4 class="form_content_title">Edit Sub Category </h4>
+								<form class="form-inline" method="post" role="form" name="new_subcategory" id="new_category" novalidate>
+									<div class="col-md-6 col_md text-center">
+										<div class="add_icon_asterisk">
+											<label for="email">CategoryType</label>
+											<!-- <input list="category" class="form-control" 
+											id="category_List" placeholder="" ng-readonly="datareadonly" required
+											data-ng-model="subCategoryDto.categoryDto.categoryType" name="categoryType" data-ng-blur="ValidateCategoryType(subCategoryDto.categoryType)">
+											<i class="fa fa-asterisk" ></i>
+										<datalist id="category">
+										<option
+												ng-repeat="x in categoryMasterDtoList track by x.categoryType"
+												value="{{x.categoryType}}">{{x.categoryType}}</option>
+										</datalist> -->
+										   <div class="new-select-option">
+                                             <select name="categoryType" id="categoryType" data-ng-model="subCategoryDto.categoryDto.categoryType"
+                                             required class="select2 form-control" tabindex="1"
+                                              style="width: 100%; height: 36px;" required>
+                                                <option></option>
+                                                <option data-ng-repeat="x in categoryMasterDtoList track by x.categoryType"
+                                                value="{{x.categoryType}}">{{x.categoryType}}</option>
+
+                                                  </select>
+                                                   <i class="fa fa-asterisk" ></i>
+                                                        </div>
+											
+										</div>
+										<div data-ng-show="new_subcategory.$submitted || new_subcategory.categoryType.$touched" class="error_msg">
+									<div data-ng-show="new_subcategory.categoryType.$error.required" class="error_msg">Please Select  Category Type</div>
+									</div>
+										<div class="add_icon_asterisk">
+											<label for="pwd"> Sub Category:</label>
+											<input type="text" class="form-control" id="subCategory" name="subCategory" maxlength="100" data-ng-model="subCategoryDto.subCategory" required>
+											<i class="fa fa-asterisk" ></i>
+											<input type="hidden" class="form-control" id="id" name="id" data-ng-model="subCategoryDto.id">
+											<input type="hidden" class="form-control" id="createdBy" name="createdBy" data-ng-model="subCategoryDto.createdBy">
+											<input type="hidden" class="form-control" id="creationDate" name="creationDate" data-ng-model="subCategoryDto.creationDate">
+										</div>
+										<div data-ng-show="new_subcategory.$submitted || new_subcategory.subCategory.$touched" class="error_msg">
+									<div data-ng-show="new_subcategory.subCategory.$error.required" class="error_msg">Please Enter Sub Category </div>
+									</div>
+										<div class="add_icon_asterisk">
+											<label for="pwd"> Model Code:</label>
+											<input type="text" class="form-control" id="model" name="model" data-ng-model="subCategoryDto.model" maxlength="10" required>
+											<i class="fa fa-asterisk" ></i>
+										</div>
+										<div data-ng-show="new_subcategory.$submitted || new_subcategory.model.$touched" class="error_msg">
+									<div data-ng-show="new_subcategory.model.$error.required" class="error_msg">Please Enter Model </div>
+									</div>
+										<div class="add_icon_asterisk">
+											<label for="pwd"> HSN Code:</label>
+											<input type="text" class="form-control" id="hsnCode" name="hsnCode" data-ng-model="subCategoryDto.hsnCode" maxlength="20" required>
+											<i class="fa fa-asterisk" ></i>
+										</div>
+										<div data-ng-show="new_subcategory.$submitted || new_subcategory.hsnCode.$touched" class="error_msg">
+									<div data-ng-show="new_subcategory.hsnCode.$error.required" class="error_msg">Please Enter HSN Code </div>
+									</div>
+										<div class="">
+											<label for="">Status:</label>
+											
+											
+									<div class="new-radio-button-inline add_icon_asterisk">
+									<div class="add_icon_asterisk">
+										<input type="radio" name="status" id="ACTIVE" value="ACTIVE"  data-ng-model="subCategoryDto.status" class="with-gap">
+										<label for="ACTIVE" >ACTIVE</label>
+										<input type="radio" name="status" id="INACTIVE" value="INACTIVE" data-ng-model="subCategoryDto.status" class="with-gap">
+										<label for="INACTIVE">INACTIVE</label> 
+									</div>
+									<i class="fa fa-asterisk" ></i>												
+									</div>		
+											
+<!-- 											 <input type="radio" class="status" name="status"id="status" value="ACTIVE"  checked data-ng-model="subCategoryDto.status" checked >ACTIVE -->
+<!-- 								  			<input type="radio" class="status"name="status" id="status"value="INACTIVE" data-ng-model="subCategoryDto.status">INACTIVE<br>  -->
+										</div>
+									</div>
+										<div class="col-12 submit_col text-center">
+											<button class="btn btn-primary" data-ng-click="saveSubCategory()"><i class="fa fa-check"></i> SAVE</button>
+											<button class="btn btn-warning" data-ng-click="back()"><i class="fa fa-close"></i> CANCEL</button>
+										</div>
+								</form>
+							</div>
+					</div>
+		
+		
+		
+		</div>
+		 <!-- ADD SUBCATEGORY -->
+		
+		<div data-ng-show="addnewSubcategory==true">
+		<div class="form_section">
+							<div class="form-content create_form">
+								<h4 class="form_content_title">Create New Sub Category  </h4>
+								<form class="form-inline"  method="post" role="form" name="addsubcategory" id="addsubcategory" novalidate >
+									<div class="col-md-6 col_md text-center">
+										<div class="add_icon_asterisk">
+											<label for="email">CategoryType</label>
+											<!-- <input
+											list="category" class="form-control" 
+											id="category_List" placeholder="" ng-readonly="datareadonly" 
+											data-ng-model="subCategoryDto.categoryDto.categoryType" name="categoryType" data-ng-blur="ValidateCategoryType(subCategoryDto.categoryType)" required autocomplete="off" tabindex="1">
+											<i class="fa fa-asterisk" ></i>
+										<datalist id="category">
+											<option
+												ng-repeat="x in categoryMasterDtoList track by x.categoryType"
+												value="{{x.categoryType}}">{{x.categoryType}}</option>
+										</datalist> -->
+										 <div class="new-select-option">
+                                             <select name="categoryType" data-ng-model="subCategoryDto.categoryDto.categoryType"
+                                             required class="select2 form-control" tabindex="1"
+                                              style="width: 100%; height: 36px;" required>
+                                                <option></option>
+                                                <option data-ng-repeat="x in categoryMasterDtoList track by x.categoryType"
+                                                value="{{x.categoryType}}">{{x.categoryType}}</option>
+
+                                                  </select>
+                                                   <i class="fa fa-asterisk" ></i>
+                                                        </div>
+										</div>
+										
+										<div data-ng-show="addsubcategory.$submitted || addsubcategory.categoryType.$touched" class="error_msg">
+									<div data-ng-show="addsubcategory.categoryType.$error.required" class="error_msg">Please Select  Category Type</div>
+									</div>
+										<div class="add_icon_asterisk">
+											<label for="pwd"> Sub Category:</label>
+											<input type="text" class="form-control" id="subCategory" name="subCategory" maxlength="100" data-ng-model="subCategoryDto.subCategory" required="required" autocomplete="off" tabindex="2" >
+											<i class="fa fa-asterisk" ></i>
+										</div>
+										
+										<div data-ng-show="addsubcategory.$submitted || addsubcategory.subCategory.$touched" class="error_msg">
+									<div data-ng-show="addsubcategory.subCategory.$error.required" class="error_msg">Please Enter Sub Category </div>
+									</div>
+										<div class="add_icon_asterisk">
+											<label for="pwd"> Model Code:</label>
+											<input type="text" class="form-control" id="model" name="model" data-ng-model="subCategoryDto.model" maxlength="10" required="required" autocomplete="off" tabindex="3">
+											<i class="fa fa-asterisk" ></i>
+										</div>
+										<div data-ng-show="addsubcategory.$submitted || addsubcategory.model.$touched" class="error_msg">
+									<div data-ng-show="addsubcategory.model.$error.required" class="error_msg">Please Enter Model </div>
+									</div>
+										
+										<div class="add_icon_asterisk">
+											<label for="pwd"> HSN Code:</label>
+											<input type="text" class="form-control" id="hsnCode" name="hsnCode" data-ng-model="subCategoryDto.hsnCode" maxlength="20" required="required" autocomplete="off"  tabindex="4">
+											<i class="fa fa-asterisk" ></i>
+										</div>
+										<div data-ng-show="addsubcategory.$submitted || addsubcategory.hsnCode.$touched" class="error_msg">
+									<div data-ng-show="addsubcategory.hsnCode.$error.required" class="error_msg">Please  Enter HSN Code </div>
+									</div>
+									</div>
+										<div class="col-12 submit_col text-center">
+											<button class="btn btn-primary" data-ng-click="saveSubCategory()"><i class="fa fa-check"></i> SAVE</button>
+											<span class="btn btn-warning" data-ng-click="cancel()"><i class="fa fa-close"></i> CANCEL</span>
+										</div>
+								</form>
+							</div>
+					</div>
+		      </div>
+		
+		
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">SubCategory</h4>
+        </div>
+        <div class="modal-body">
+        <table class="table table-bordered table-striped">
+     					<!-- <tr><th>Category Type </th><td>{{view_subcategory_details.categoryType}}</td></tr>  -->
+							<tr><th>Model Code</th><td>{{view_subcategory_details.model}}</td></tr>
+							<tr><th>SubCategory</th><td>{{view_subcategory_details.subCategory}}</td></tr>							
+							<tr><th>Status</th><td>{{view_subcategory_details.status}}</td></tr>
+			</table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>		
+		
+		
+		
+		</div>
+		
+      
+
+            <!-- Row -->
+            <!-- ============================================================== -->
+
+
+
+
+
+
+
+<jsp:include page="footer.jsp" />

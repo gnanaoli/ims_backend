@@ -1,0 +1,647 @@
+ <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="security" uri="http://www.springframework.org/security/tags" %>
+    <%@ page isELIgnored="false" %>
+<jsp:include page="header.jsp" />
+
+
+
+            <!-- Container fluid  -->
+            <!-- ============================================================== -->
+            <div class="container-fluid user-top" data-ng-controller="SupplierController">
+                <!-- ============================================================== -->
+                <!-- Bread crumb and right sidebar toggle -->
+                <!-- ============================================================== -->
+                <div class="row page-titles">
+                    <div class="col-md-5 align-self-center">
+                        <h3 class="text-themecolor">SUPPLIER</h3>
+                    </div>
+
+                   <div class="col-md-7 align-self-center">
+                    <security:authorize access="hasAuthority('WAREHOUSE ADMINISTRATOR') or hasAuthority('OFFICE ADMINISTRATOR')">
+                    <div data-ng-if="supplierMgt">
+                        <ol class="breadcrumb">
+                            <li><a class="btn btn-primary waves-effect waves-light" href="officeAdmin?link=AddSupplier"><i class="fa fa-user-plus"></i> Add supplier</a></li>
+                        </ol>
+                        </div>
+                     </security:authorize>
+                    </div>
+                </div>
+                <!-- ============================================================== -->
+                <!-- End Bread crumb and right sidebar toggle -->
+                <!-- ============================================================== -->
+                <!-- ============================================================== -->
+                <!-- Start Page Content -->
+                <!-- ============================================================== -->
+                <!-- Row -->
+		<div class="form_section">
+
+
+
+<div data-ng-if="supplierMgt">
+			<div class="form-content">
+				<h4 class="form_content_title">Search Suppliers</h4>
+
+<div class="table-responsive">
+				<table data-datatable="ng" data-dt-options="dtOptions" 
+					class="table table-striped table-bordered" style="width:100%">
+					<thead>
+						<tr>
+							<th>Supplier Name</th>
+							<th>Supplier Code</th>
+							<th>Address1</th>
+							<th>Area / Landmark</th>
+							<th>City</th>
+							<th>Status</th>
+							<th class="not-export-col">Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr data-ng-repeat="supplier_details in supplier_master">
+							<td>{{supplier_details.supplierName}}</td>
+							<td>{{supplier_details.supplierCode}}</td>
+							<td>{{supplier_details.address1}}</td>
+							<td>{{supplier_details.area}}</td>
+							<td>{{supplier_details.city}}</td>
+							<td>{{supplier_details.status}}</td>
+							<td class="table_btn_group">
+							 <security:authorize access="hasAuthority('WAREHOUSE ADMINISTRATOR') or hasAuthority('OFFICE ADMINISTRATOR')">
+							 <a href="" data-ng-click="edit(supplier_details)" class="btn btn-primary"><i class="fa fa-edit"></i> Edit</a>
+							</security:authorize>
+							<a href="" data-ng-click="view(supplier_details)" class="btn btn-primary"><i class="fa fa-drivers-license-o"></i> View</a></td>
+						</tr>
+					</tbody>
+				</table>
+
+</div>
+
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Supplier Details</h4>
+        </div>
+        <div class="modal-body">
+        <table class="table table-bordered table-striped">
+         					<tr><th>Supplier Name </th><td>{{view_supplier_details.supplierName}}</td></tr>
+							<tr><th>Supplier Code</th><td>{{view_supplier_details.supplierCode}}</td></tr>
+							<tr><th>Address 1</th><td>{{view_supplier_details.address1}}</td></tr>
+							<tr><th>Address 2</th><td>{{view_supplier_details.address2}}</td></tr>
+							<tr><th>Area / LandMark</th><td>{{view_supplier_details.area}}</td></tr>
+							<tr><th>City</th><td>{{view_supplier_details.city}}</td></tr>
+							<tr><th>Status</th><td>{{view_supplier_details.status}}</td></tr>
+			</table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+			</div>
+			</div>
+			
+			
+			
+			
+<div data-ng-show="editSupplier">			
+			
+			<div class="form-content create_form">
+			<h4 class="form_content_title">Edit Supplier</h4>
+			<form class="form-inline" name="add_supplier" role="form" novalidate>
+				<div class="col-md-6 col_md text-center">
+					<div class="add_icon_asterisk">
+						<label for="email">Supplier</label> <input type="text"
+							class="form-control" id="supplierName" name="supplierName"
+							data-ng-model="supplierDto.supplierName"
+							readonly required autocomplete="off" allowspace tabindex="1"> 
+							<i class="fa fa-asterisk" ></i>
+							
+					</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.supplierName.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.supplierName.$error.required"
+							class="error_msg">Please enter Supplier Name</div>
+					</div>
+
+
+					<div class="add_icon_asterisk">
+						<label for="pwd"> Office Country</label> 
+						
+						
+						
+							<div class="new-select-option">
+								<select name="country" id="country"
+									data-ng-model="supplierDto.country"
+									data-ng-change="getStates(supplierDto.country)"
+									required class="select2 form-control" tabindex="2"
+									style="width: 100%; height: 36px;">
+
+									<option value="" selected>--- SELECT COUNTRY ---</option>
+
+									<option
+										data-ng-repeat="x in countryDtoList track by x.countryName"
+										value="{{x.countryName}}">{{x.countryName}}</option>
+
+								</select>
+								<i class="fa fa-asterisk" ></i>
+							</div>
+						
+						
+<!-- 						<input list="country" -->
+<!-- 							class="form-control" id="country_List" name="country" -->
+<!-- 							placeholder="" required -->
+<!-- 							data-ng-model="supplierDto.country" -->
+<!-- 							data-ng-change="getStates(supplierDto.country);" -->
+<%-- 							data-ng-init="supplierDto.country='${lists[0].country}'" --%>
+<!-- 							autocomplete="off" tabindex="2"> -->
+<!-- 							<i class="fa fa-asterisk" ></i> -->
+<!-- 						<datalist id="country"> -->
+<!-- 							<option data-ng-repeat="x in countryDtoList track by x.countryName" -->
+<!-- 								value="{{x.countryName}}">{{x.countryName}}</option> -->
+<!-- 						</datalist> -->
+						
+						
+					</div>
+					<div
+						data-ng-if="isInValidCountry==true && supplierDto.country.toString().length >0">Please
+						choose valid Country</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.country.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.country.$error.required"
+							class="error_msg">Please Select Country Name</div>
+					</div>
+
+
+					<div class="add_icon_asterisk">
+						<label for="pwd"> Office State</label> 
+						
+						
+							<div class="new-select-option">
+								<select name="state" id="state"
+									data-ng-model="supplierDto.state"
+									data-ng-change="getCity(supplierDto.state,supplierDto.country)"
+									required class="select2 form-control" tabindex="3"
+									style="width: 100%; height: 36px;">
+
+									<option value="" selected>--- SELECT STATE ---</option>
+
+									<option
+										data-ng-repeat="x in stateEntityList track by x.stateName"
+										value="{{x.stateName}}">{{x.stateName}}</option>
+
+								</select>
+								<i class="fa fa-asterisk" ></i>
+							</div>
+						
+						
+<!-- 						<input list="state" -->
+<!-- 							class="form-control" id="state_List" name="state" -->
+<!-- 							placeholder="" data-ng-readonly="datareadonly" required -->
+<!-- 							data-ng-model="supplierDto.state" -->
+<!-- 							data-ng-blur="getCity(supplierDto.state,supplierDto.country)" -->
+<%-- 							data-ng-init="supplierDto.state='${lists[0].state}'" --%>
+<!-- 							autocomplete="off" tabindex="3"> -->
+<!-- 							<i class="fa fa-asterisk" ></i> -->
+<!-- 						<datalist id="state"> -->
+<!-- 							<option -->
+<!-- 								data-ng-repeat="x in stateEntityList track by x.stateName" -->
+<!-- 								value="{{x.stateName}}">{{x.stateName}}</option> -->
+<!-- 						</datalist> -->
+
+					</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.state.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.state.$error.required"
+							class="error_msg">Please Select State</div>
+					</div>
+					
+					<div class="add_icon_asterisk">
+						<label for="pwd">Office City</label> 
+						
+						
+							<div class="new-select-option">
+								<select name="city" id="city"
+									data-ng-model="supplierDto.city"
+									required class="select2 form-control" tabindex="4"
+									style="width: 100%; height: 36px;">
+
+									<option value="" selected>--- SELECT CITY ---</option>
+
+									<option
+										data-ng-repeat="x in cityEntityList track by x.cityName"
+										value="{{x.cityName}}">{{x.cityName}}</option>
+
+								</select>
+								<i class="fa fa-asterisk" ></i>
+							</div>
+						
+						
+						
+
+					</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.city.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.city.$error.required" class="error_msg">Please
+							Select City</div>
+					</div>
+
+					<div class="add_icon_asterisk">
+						<label for="pwd">Office Address 1 :</label> <input type="text"
+							class="form-control" id="address1" name="address1" addressvalid
+							data-ng-model="supplierDto.address1"
+							required
+							autocomplete="off" tabindex="5">
+							<i class="fa fa-asterisk" ></i>
+					</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.address1.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.address1.$error.required"
+							class="error_msg">Please enter Address1</div>
+					</div>
+					<div class="">
+						<label for="pwd">Office  Address 2:</label> <input type="text"
+							class="form-control" id="address2" name="address2" addressvalid
+							data-ng-model="supplierDto.address2"
+							autocomplete="off" tabindex="6">
+					</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.address2.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.address2.$error.required"
+							class="error_msg">Please enter Address2</div>
+					</div>
+					<div class="">
+						<label for="pwd"> Area / Landmark for Office:</label> <input type="text"
+							class="form-control" id="area" name="area" addressvalid
+							data-ng-model="supplierDto.area"
+							autocomplete="off" tabindex="7">
+					</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.area.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.area.$error.required" class="error_msg">Please
+							enter Area</div>
+					</div>
+
+			
+				
+
+					<div class="add_icon_asterisk">
+						<label for="email">Office Pin Code:</label> <input type="text"
+							class="form-control" id="pinCode" name="pinCode"
+							data-ng-model="supplierDto.pinCode"
+							 maxlength="6" data-ng-minlength="6"
+							numbersonly required autocomplete="off" tabindex="8">
+							<i class="fa fa-asterisk" ></i>
+					</div>
+                              <div data-ng-show="add_supplier.$submitted || add_supplier.pinCode.$touched" class="error_msg">
+            <div data-ng-show="!add_supplier.pinCode.$valid" class="error_msg">Please Enter Valid 6 digit PinCode</div>
+               </div>
+               
+               
+               
+               <div class="add_icon_asterisk">
+						<label for="pwd">Godown Country</label> 
+						
+						
+						
+							<div class="new-select-option">
+								<select name="godownCountry" id="godownCountry"
+									data-ng-model="supplierDto.godownCountry"
+									data-ng-change="getGodownStates(supplierDto.godownCountry)"
+									required class="select2 form-control" tabindex="9"
+									style="width: 100%; height: 36px;">
+
+									<option value="" selected>--- SELECT COUNTRY ---</option>
+
+									<option
+										data-ng-repeat="x in countryDtoList track by x.countryName"
+										value="{{x.countryName}}">{{x.countryName}}</option>
+
+								</select>
+								<i class="fa fa-asterisk" ></i>
+							</div>
+						
+						
+<!-- 						<input list="country" -->
+<!-- 							class="form-control" id="country_List" name="country" -->
+<!-- 							placeholder="" required -->
+<!-- 							data-ng-model="supplierDto.country" -->
+<!-- 							data-ng-change="getStates(supplierDto.country);" -->
+<%-- 							data-ng-init="supplierDto.country='${lists[0].country}'" --%>
+<!-- 							autocomplete="off" tabindex="2"> -->
+<!-- 							<i class="fa fa-asterisk" ></i> -->
+<!-- 						<datalist id="country"> -->
+<!-- 							<option data-ng-repeat="x in countryDtoList track by x.countryName" -->
+<!-- 								value="{{x.countryName}}">{{x.countryName}}</option> -->
+<!-- 						</datalist> -->
+						
+						
+					</div>
+					<div
+						data-ng-if="isInValidCountry==true && supplierDto.godownCountry.toString().length >0">Please
+						choose valid Godown Country</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.godownCountry.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.godownCountry.$error.required"
+							class="error_msg">Please Select Godown Country Name</div>
+					</div>
+
+
+
+					<div class="add_icon_asterisk">
+						<label for="pwd">Godown State</label> 
+						
+						
+							<div class="new-select-option">
+								<select name="godownState" id="godownState"
+									data-ng-model="supplierDto.godownState"
+									data-ng-change="getGodownCity(supplierDto.godownState,supplierDto.godownCountry)"
+									required class="select2 form-control" tabindex="10"
+									style="width: 100%; height: 36px;">
+
+									<option value="" selected>--- SELECT STATE ---</option>
+
+									<option
+										data-ng-repeat="x in godownStateEntityList track by x.stateName"
+										value="{{x.stateName}}">{{x.stateName}}</option>
+
+								</select>
+								<i class="fa fa-asterisk" ></i>
+							</div>
+						
+						
+
+					</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.godownState.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.godownState.$error.required"
+							class="error_msg">Please Select Godown  State</div>
+					</div>
+
+					<div class="add_icon_asterisk">
+						<label for="pwd">Godown City</label> 
+						
+						
+							<div class="new-select-option">
+								<select name="godownCity" id="godownCity"
+									data-ng-model="supplierDto.godownCity"
+									required class="select2 form-control" tabindex="11"
+									style="width: 100%; height: 36px;">
+
+									<option value="" selected>--- SELECT CITY ---</option>
+
+									<option
+										data-ng-repeat="x in godownCityEntityList track by x.cityName"
+										value="{{x.cityName}}">{{x.cityName}}</option>
+
+								</select>
+								<i class="fa fa-asterisk" ></i>
+							</div>
+
+					</div>
+					
+					 </div>
+		<div class="col-md-6 col_md text-center">
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.godownCity.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.godownCity.$error.required" class="error_msg">Please
+							Select Godown City</div>
+					</div>
+
+					<div class="add_icon_asterisk">
+						<label for="pwd">Godown Address 1 :</label> <input type="text"
+							class="form-control" id="godownAddress1" name="godownAddress1" addressvalid
+							data-ng-model="supplierDto.godownAddress1"
+							required
+							autocomplete="off" tabindex="12">
+							<i class="fa fa-asterisk" ></i>
+					</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.godownAddress1.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.godownAddress1.$error.required"
+							class="error_msg">Please Select Godown Address1</div>
+					</div>
+					<div class="">
+						<label for="pwd">Godown Address 2:</label> <input type="text"
+							class="form-control" id="godownAddress2" name="godownAddress2" addressvalid
+							data-ng-model="supplierDto.godownAddress2"
+							autocomplete="off" tabindex="13">
+					</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.godownAddress2.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.godownAddress2.$error.required"
+							class="error_msg">Please Select Godown Address2</div>
+					</div>
+					<div class="">
+						<label for="pwd">Godown Area / Landmark:</label> <input type="text"
+							class="form-control" id="godownArea" name="godownArea" addressvalid
+							data-ng-model="supplierDto.godownArea"
+							autocomplete="off" tabindex="14">
+					</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.godownArea.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.godownArea.$error.required" class="error_msg">Please
+							Select Godown Area</div>
+					</div>
+
+				
+				
+
+					<div class="add_icon_asterisk">
+						<label for="email">Godown Pin Code:</label> 
+						<input type="text"
+							class="form-control" id="godownPinCode" name="godownPinCode"
+							data-ng-model="supplierDto.godownPinCode"
+							 maxlength="6" data-ng-minlength="6"
+							numbersonly required autocomplete="off" tabindex="15">
+							<i class="fa fa-asterisk" ></i>
+					</div>
+                              <div data-ng-show="add_supplier.$submitted || add_supplier.godownPinCode.$touched" class="error_msg">
+            <div data-ng-show="!add_supplier.godownPinCode.$valid" class="error_msg">Please enter Valid 6 digit PinCode</div>
+               </div>
+               
+              
+					<div class="">
+						<label for="pwd">Contact Person:</label> <input type="text"
+							class="form-control" id="contactPerson" name="contactPerson" contactman
+							data-ng-model="supplierDto.contactPerson"
+							 autocomplete="off" tabindex="16">
+					</div>
+					
+					
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.contactPerson.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.contactPerson.$error.required"
+							class="error_msg">Please enter Contact Person</div>
+					</div>
+
+					<div class="">
+						<label for="pwd">TelePhone No :</label> <input type="text"
+							class="form-control" id="telePhoneNo" name="telePhoneNo"
+							data-ng-model="supplierDto.telePhoneNo"
+							maxlength="11" data-ng-minlength="7"  numbersonly autocomplete="off"
+							tabindex="17">
+					</div>
+                              <div data-ng-show="add_supplier.$submitted || add_supplier.telePhoneNo.$touched" class="error_msg">
+            <div data-ng-show="!add_supplier.telePhoneNo.$valid" class="error_msg">Please Enter Valid TelePhone Number</div>
+               </div>
+
+					<div class="">
+						<label for="pwd"> Mobile No:</label> <input type="text"
+							class="form-control" id="mobileNo" name="mobileNo" maxlength="10" data-ng-minlength="10"
+							mobileno data-ng-model="supplierDto.mobileNo"
+							autocomplete="off" tabindex="18">
+					</div>
+                              <div data-ng-show="add_supplier.$submitted || add_supplier.mobileNo.$touched" class="error_msg">
+            <div data-ng-show="!add_supplier.mobileNo.$valid" class="error_msg">Please Enter Valid 10 digit Mobile Number</div>
+               </div>
+
+
+					<div class="">
+						<label for="pwd"> Fax:</label> <input type="text"
+							class="form-control" id="fax" name="fax"
+							data-ng-model="supplierDto.fax" maxlength="10" data-ng-minlength="10"
+							autocomplete="off" tabindex="19">
+					</div>
+                              <div data-ng-show="add_supplier.$submitted || add_supplier.fax.$touched" class="error_msg">
+            <div data-ng-show="!add_supplier.fax.$valid" class="error_msg">Please Enter Valid 10 Fax number</div>
+               </div>
+					<div class="">
+						<label for="pwd"> E-Mail Id:</label> <input type="email"
+							 id="emailId" name="emailId" ng-pattern="emailFormat" class="email" emailidvalid
+							data-ng-model="supplierDto.emailId" autocomplete="off"
+							tabindex="20" maxlength="50">
+					</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.emailId.$touched"
+						class="error_msg" class="error_msg">
+						<div data-ng-show="add_supplier.emailId.$error.required"
+							class="error_msg">Please enter E-mailid</div>
+						<div class="error_msg" data-ng-show="add_supplier.emailId.$error.pattern">
+							Not a valid Email </div>
+
+					</div>
+					<div class="add_icon_asterisk">
+						<label for="pwd"> GST IN:</label> <input type="text"
+							class="form-control" id="gstIn" name="gstIn"
+							data-ng-model="supplierDto.gstIn"
+							data-ng-init="supplierDto.gstIn='${lists[0].gstIn}'" 
+							autocomplete="off" tabindex="21" required data-ng-minlength="15"  maxlength="15" gstinvalid capitalize nospecialchar>
+							<i class="fa fa-asterisk" ></i>
+					</div>
+					<div
+						data-ng-show="add_supplier.$submitted || add_supplier.gstIn.$touched"
+						class="error_msg">
+						<div data-ng-show="add_supplier.gstIn.$error.required"
+							class="error_msg">Please enter GST No</div>
+					</div>
+					<div class="add_icon_asterisk">
+						<label for="pwd"> Status:</label>
+
+						<div class="new-radio-button-inline">
+							<input type="radio" data-ng-model="supplierDto.status"
+								data-ng-init="supplierDto.status='${lists[0].status}'" required
+								class="with-gap" name="status" id="ACTIVE" value="ACTIVE"
+								tabindex="15"> <label for="ACTIVE">ACTIVE</label> <input
+								type="radio" data-ng-model="supplierDto.status"
+								data-ng-init="supplierDto.status='${lists[0].status}'" required
+								class="with-gap" name="status" id="INACTIVE" value="INACTIVE"
+								tabindex="22"> <label for="INACTIVE">INACTIVE</label>
+						</div>
+						<i class="fa fa-asterisk" ></i>
+
+						<div
+							data-ng-show="add_supplier.$submitted || add_supplier.status.$touched"
+							class="error_msg">
+							<div data-ng-show="add_supplier.status.$error.required"
+								class="error_msg">Please select the status</div>
+						</div>
+
+
+					</div>
+				</div>
+				<div class="col-12 submit_col text-center">
+					<button class="btn btn-primary"
+						data-ng-click="saveSupplier($event,add_supplier)">
+						<i class="fa fa-check"></i> SAVE
+					</button>
+					<span class="btn btn-warning" data-ng-click="cancel()">
+						<i class="fa fa-close"></i> CANCEL
+					</span>
+				</div>
+				</form>
+		</div>		
+			
+</div>			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+		</div>
+            </div>
+
+            <!-- Row -->
+            <!-- ============================================================== -->
+
+
+
+
+
+
+
+<jsp:include page="footer.jsp" />
+
+
+
+<script>
+
+$(document).ready(function() {
+    $('#example').DataTable( {
+        dom: 'Bfrtip',
+        buttons: [
+            'copyHtml5',
+            'excelHtml5',
+            'csvHtml5',
+            'pdfHtml5'
+        ]
+    } );
+} );
+
+</script>

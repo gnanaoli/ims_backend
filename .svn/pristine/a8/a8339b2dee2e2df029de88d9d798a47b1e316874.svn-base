@@ -1,0 +1,267 @@
+ims.controller('manufacturerManagementController',function($scope,$http,InsertService,FetchService,DTOptionsBuilder,$location,UrlConstants,$timeout) {
+	
+	$scope.ManufacturerMgt = true;
+	//$scope.inSideIndia = true;
+	$scope.manufacturerDto={};
+	$scope.manufacturerDtoList=[];
+	$scope.activeManufactureList=[];
+	$scope.cityDtoList=[];
+	$scope.isDisabled=true;
+	$scope.stateEntityList=[];
+	$scope.cityEntityList=[];
+	$scope.TempCityList =[];
+	$scope.length="10";
+	
+	$scope.emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+	
+     FetchService.getAllManufacturerList().then(function(response){
+		
+		$scope.manufacturerDtoList=response;
+	});
+	
+     FetchService.getAllActiveManufacturer().then(function(response){
+		
+		$scope.activeManufactureList=response;
+	});
+	
+     FetchService.getAllCountryAndStatesAndProject().then(function(response){
+ 		
+     	console.log("getAllCountryAndStatesAndProject"+JSON.stringify(response));
+     	$scope.countryDtoList=response;
+     		
+    });
+     getAllStates();
+	
+   /*  
+     $scope.isInValidCountry=false;
+ 	$scope.getStates = function(country){
+ 		$scope.manufacturerDto.state = '';
+ 		$scope.stateEntityList = '';
+ 		$scope.loop=true;
+ 		angular.forEach($scope.countryDtoList,function(value,key)
+ 				{
+ 			if($scope.loop)
+ 				{
+ 				if(value.countryName==country)
+ 		    	 {
+ 		    	  $scope.stateEntityList=$scope.countryDtoList[key].stateItem;
+ 		    	  $scope.isInValidCountry=false;
+ 		    	  $scope.loop=false;
+ 		    	 }
+ 				}
+ 			 else
+ 	    	 {
+ 	    	// $scope.manufacturerDto.country='';
+ 	    	  //$scope.isInValidCountry=true;
+ 	    	 }
+ 			     
+ 				});
+ 	}*/
+     function getAllStates()
+ 	{
+ 		console.log("getAllCountryAndStatesAndProject"+JSON.stringify($scope.countryDtoList));
+ 		angular.forEach($scope.countryDtoList,function(value,key)
+ 				{
+ 				if(value.countryName=='INDIA')
+ 		    	 {
+ 		    	  $scope.stateEntityList=$scope.countryDtoList[key].stateItem;
+ 		    	 }
+ 				});
+ 	}
+	
+ 	
+ 	$scope.getCity = function(state,country){
+		$scope.manufacturerDto.city = '';
+		$scope.cityEntityList = '';
+		angular.forEach($scope.countryDtoList,function(value,key)
+				{
+			     if(value.countryName==country)
+			    	 {
+			    	  $scope.TempCityList=$scope.countryDtoList[key].stateItem;
+			    	  angular.forEach($scope.TempCityList,function(value,key){
+			    		  if(value.stateName==state)
+			    			  {
+			    			  $scope.cityEntityList=$scope.TempCityList[key].cityItem;
+			    			  }
+			    	  });
+			    	 }
+				});		
+	}
+	
+	
+	
+	/*FOR SAVE THE MANUFACTURER*/
+	$scope.saveManufacturer=function(formValid)
+	{
+		//if ($scope.editManufacturer.$valid||$scope.addManufacturer.$valid) 
+		if(formValid)
+		{
+			
+		
+		InsertService.saveManufacturer($scope.manufacturerDto).then(function(response)
+				{		
+			       if(response.status=="success")
+			    	   {
+			    	   
+			    	   
+			    	   if($scope.manufacturerDto.id)
+		    		   {
+		    		   $scope.SuccessMsg = "Manufacturer Updated";
+		    		   }
+		    	   else
+		    		   {
+		    		   $scope.SuccessMsg = "Manufacturer Saved";
+		    		   }
+			    	   
+			    	   
+						 swal(
+								 ''+$scope.SuccessMsg,
+			                     '',
+			                     'success'
+								 ).then(function(isConfirm) {
+			                  		if (isConfirm) {
+			                  			
+			                  		//location.href=UrlConstants.REDIRECTWAREHOUSEADMINIMS_URL+"Manufacturer";
+			                  			location.reload();
+	
+			                 		}
+			                      });
+			    	   
+			    	   }
+			       else if(angular.isDefined(response.exceptionMessage))
+			    	{
+			    	 swal(
+						      'Not Saved!',
+						      response.exceptionMessage,
+						      'warning'
+						    )
+			    	}
+				});
+	}
+	
+	};
+	
+	$scope.edit = function(Manufacturer_Details)
+	{
+
+ 		$scope.ManufacturerMgt = false;
+		$scope.editManufacturer= true;
+		$scope.addnewManufacturer = false;
+		$scope.manufacturerDto = Manufacturer_Details;
+	
+		if($scope.manufacturerDto.country != null)
+		{
+			
+			$timeout(function() {
+				$('#country1').val(Manufacturer_Details.country).trigger('change');
+			}, 1);
+			
+			getAllStates();
+		
+			/*$timeout(function() {
+				$('#state1').val(Manufacturer_Details.state).trigger('change');
+			}, 1);*/
+			if($scope.manufacturerDto.indiaOrOutside == 'INDIA')
+			{
+				$scope.outSideIndia=false;
+				$scope.inSideIndia=true;
+				$scope.length="10";
+			}
+			else if($scope.manufacturerDto.indiaOrOutside == 'OUTSIDE INDIA'){
+				$scope.outSideIndia=true;
+				$scope.inSideIndia=false;
+				$scope.length="20";
+				
+			}
+			
+			var stateName = Manufacturer_Details.state;
+			
+			var cityName = Manufacturer_Details.city;
+			
+			/*$scope.getStates(Manufacturer_Details.country);*/
+			//$scope.getStates();
+			
+			$scope.getAllStates
+			
+			$scope.getCity(stateName,Manufacturer_Details.country);
+			
+			$scope.manufacturerDto.state = stateName;
+			
+			$scope.manufacturerDto.city = cityName;
+			
+		}
+		
+	}
+ 	
+ 	$scope.newManufacturer = function()
+	{
+
+ 		$scope.ManufacturerDto = {};
+		$scope.ManufacturerMgt = false;
+		$scope.editManufacturer = false;
+		$scope.addnewManufacturer = true;
+		
+	}
+
+	
+	
+	
+	
+	
+	
+	$scope.cancel=function()
+	{
+		location.href=UrlConstants.REDIRECTOFFICEADMINIMS_URL+"Manufacturer";
+	}
+	
+	 $scope.dtOptions = DTOptionsBuilder.newOptions()
+	    .withDOM('<"top"lrf><"bottom"tip>').withLanguage({"sEmptyTable":"No Record Found"})
+    .withButtons([            
+    	{extend: 'excel',
+        exportOptions: {
+           columns: ':visible:not(.not-export-col)'
+        }
+    	},
+    	{
+    	extend:'colvis'
+    	}
+]);	
+	 
+	 
+	 $scope.view = function(Manufacturer_Details) {   	
+	    	
+	    	//alert(JSON.stringify(supplier_details));
+	   	
+	    	$("#myModal").modal('show');
+	    	
+	    	$scope.manufacturerDetails = Manufacturer_Details;    	
+	    	
+	    	
+	    }
+	 
+	 $scope.isCountrySelected=function(indiaOrOutside)
+		{
+			if(indiaOrOutside==='INDIA')
+				{
+				//$scope.manufacturerDto.mobileNumber="";
+				$scope.length="10";
+				$scope.inSideIndia=true;
+				$scope.outSideIndia=false;
+				$scope.manufacturerDto.country="INDIA";
+				getAllStates();
+				
+				}
+			else if(indiaOrOutside==='OUTSIDE INDIA'){
+				//$scope.manufacturerDto.mobileNumber="";
+				$scope.length="20";
+				$scope.outSideIndia=true;
+				$scope.inSideIndia=false;
+				$scope.manufacturerDto.country='';
+				$scope.manufacturerDto.state='';
+				$scope.manufacturerDto.city='';
+				
+			}
+		}
+	 
+	
+});

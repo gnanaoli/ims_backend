@@ -1,0 +1,98 @@
+
+package com.fa.inventory.service.impl;
+
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
+
+import com.fa.inventory.constants.InventoryConstant;
+import com.fa.inventory.controller.InventoryController1;
+import com.fa.inventory.dto.DepartmentDto;
+import com.fa.inventory.entity.Department;
+import com.fa.inventory.repository.DepartmentRepository;
+import com.fa.inventory.service.DepartmentService;
+
+@Service
+public class DepartmentServiceImpl implements DepartmentService {
+	@Resource
+	DepartmentRepository departmentRepository;
+
+	protected final Logger logger = Logger.getLogger(InventoryController1.class);
+
+	@Override
+	public String saveDepartment(DepartmentDto departmentDto, Principal principal) throws Exception {
+
+		String status = InventoryConstant.FAILURE;
+		Department department = new Department();
+		logger.info("<--DepartmentServiceImpl-------------saveDepartment--------------------started-->");
+
+		if (departmentDto != null && departmentDto.getId() != null) {
+			department = new Department();
+			department = departmentRepository.findOne(departmentDto.getId());
+			if (department.getName().equals(departmentDto.getName())) {
+				department.setId(departmentDto.getId());
+				department.setName(departmentDto.getName());
+				department.setStatus(departmentDto.getStatus());
+			} else {
+
+				department = departmentRepository.findByName(departmentDto.getName());
+				if (department != null) {
+					throw new Exception(InventoryConstant.THIS_DEPARTMENT_ALREADY_EXISTS);
+				} else {
+					department = new Department();
+					department.setId(departmentDto.getId());
+					department.setName(departmentDto.getName());
+					department.setStatus(departmentDto.getStatus());
+				}
+			}
+
+		} else {
+
+			department = departmentRepository.findByName(departmentDto.getName());
+			if (department != null) {
+				throw new Exception(InventoryConstant.THIS_DEPARTMENT_ALREADY_EXISTS);
+			} else {
+				department = new Department();
+				department.setName(departmentDto.getName());
+				department.setStatus(InventoryConstant.ACTIVE);
+			}
+		}
+
+		department = departmentRepository.save(department);
+		if (department != null) {
+			status = InventoryConstant.SUCCESS;
+		}
+
+		logger.info("<--DepartmentService-------------saveDepartment--------------------Ended-->");
+		return status;
+	}
+
+	@Override
+	public List<DepartmentDto> getAllDepartment(Principal principal) {
+		logger.info("<--UserManagementServiceImpl-------------getAllDepartment--------------------started-->");
+		List<DepartmentDto> departmentDtoList = new ArrayList<>();
+		List<Department> departmentList = departmentRepository.findAll();
+
+		if (departmentList != null && !departmentList.isEmpty()) {
+			for (int i = 0; i < departmentList.size(); i++) {
+
+				Department department = departmentList.get(i);
+				if (department != null) {
+					DepartmentDto departmentDto = new DepartmentDto();
+					departmentDto.setId(department.getId());
+					departmentDto.setName(department.getName());
+					departmentDto.setStatus(department.getStatus());
+					departmentDtoList.add(departmentDto);
+				}
+
+			}
+			logger.info("<--UserManagementServiceImpl-------------getAllDepartment--------------------Ended-->");
+		}
+		return departmentDtoList;
+	}
+}

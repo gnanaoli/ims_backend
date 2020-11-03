@@ -1,0 +1,196 @@
+ims.controller('BlockManagementController', function($scope, $http, TestService, $window, FetchService,InsertService,DTOptionsBuilder,$location,UrlConstants,$timeout) {
+
+
+	var absurl = $location.absUrl();
+	
+	$scope.BlockMgt = true;
+	
+	$scope.blockDtoMaster = [];
+
+	
+	$scope.test=[];
+	function getAllWareHouseBlocks()
+	{
+		FetchService.getAllWareHouseBlocks().then(function(response) {
+			
+			$scope.blockDtoMaster = response;
+			console.log(JSON.stringify(response));
+			
+			
+			angular.forEach($scope.blockDtoMaster,function(value,key){
+				if(value.wareHouseBlocksDto)
+					{
+					angular.forEach(value.wareHouseBlocksDto,function(v,k){
+						var obj={
+								
+								wareHouseName:value.wareHouseName,
+								id:v.id,
+								blockNames:v.blocksNames,
+								code:v.code,
+								status:v.status,
+						}
+						$scope.test.push(obj);
+					});
+					
+					}
+			});
+			console.log("test===>"+JSON.stringify($scope.test));
+		});
+		
+		
+		
+		
+	}
+	
+	
+	        if(absurl == UrlConstants.REDIRECTWAREHOUSEADMINIMS_URL+CURRENT_PAGENAME)
+			{
+	        	getAllUserWareHouseBlock();
+			}
+	        else
+	        	{
+	        	getAllWareHouseBlocks();
+	        	}
+	
+	
+	function getAllUserWareHouseBlock()
+	{
+	
+		FetchService.getAllUserWareHouseBlock().then(function(response) {
+			
+			$scope.blockDtoMaster = response;
+			console.log(JSON.stringify(response));
+			
+		});
+	
+	}
+	/*FetchService.getAllWareHouseList().then(function(response)*/
+	FetchService.getAllActiveWareHouse().then(function(response){
+		$scope.wareHouseDtoList=response;
+	});
+
+	/*FetchService.getCurrentUserWareHouseDropDown().then(function(response){
+		$scope.activeWareHouseList=response;
+	});*/
+	
+	
+	$scope.saveBlock = function()
+	{
+		if($scope.addBlock.$valid)
+			{
+			InsertService.saveBlock($scope.blockDto).then(function(response)
+					{
+				if(response.status == 'success')
+				{
+					
+			    	   if($scope.blockDto.id)
+		    		   {
+		    		   $scope.SuccessMsg = "Block Updated";
+		    		   }
+		    	   else
+		    		   {
+		    		   $scope.SuccessMsg = "Block Saved";
+		    		   }
+					
+					 swal(
+					''+$scope.SuccessMsg,
+                     '',
+                     'success'
+					 ).then(function(isConfirm) {
+                  		if (isConfirm) {
+                  			//location.href=UrlConstants.REDIRECTWAREHOUSEADMINIMS_URL+"BlockManagement";
+                  			var absurl = $location.absUrl();
+                   			if(absurl == UrlConstants.REDIRECTOFFICEADMINIMS_URL+CURRENT_PAGENAME)
+                   			{
+                   				location.href=UrlConstants.REDIRECTOFFICEADMINIMS_URL+"BlockManagement";
+                   			}
+                   			else if(absurl == UrlConstants.REDIRECTWAREHOUSEADMINIMS_URL+CURRENT_PAGENAME)
+                   			{
+                   				location.href=UrlConstants.REDIRECTWAREHOUSEADMINIMS_URL+"BlockManagement";
+                   			}
+                 		}
+                      });
+				}
+			else
+				{
+	 		  		swal(
+						''+response.exceptionMessage+'',
+	                    '',
+	                    'warning'
+		 		  	  )
+				}
+					});
+			
+			}
+	}
+	
+	
+	$scope.edit = function(block_details)
+	{
+		
+		$scope.BlockMgt = false;
+		$scope.editBlock = true;
+		$scope.blockDto = {
+				"id":block_details.id,
+				"blocksNames":block_details.blockNames,
+				"code":block_details.code,
+				"status":block_details.status,
+				//"wareHouseDto":{"wareHouseName":block_details.wareHouseName},
+				"wareHouseName":block_details.wareHouseName,
+				};
+		
+		$timeout(function() {
+			$('#wareHouseName').val($scope.blockDto.wareHouseName).trigger('change');
+		}, 1);
+	}
+		
+		
+	
+	$scope.cancel = function()
+	{
+        if(absurl == UrlConstants.REDIRECTOFFICEADMINIMS_URL+CURRENT_PAGENAME)
+		{
+        	getAllUserWareHouseBlock();
+		}
+        else
+        	{
+        	getAllWareHouseBlocks();
+        	}
+		$scope.BlockMgt = true;
+		$scope.editBlock = false;
+	}
+	
+	$scope.back = function()
+	{
+		location.href=UrlConstants.REDIRECTOFFICEADMINIMS_URL+"BlockManagement";
+	}
+	
+	
+	 $scope.view = function(blockManagementDto) {
+		 console.log(JSON.stringify(blockManagementDto));
+	    	$("#myModal").modal('show');
+	    	$scope.blockManagementDetails = blockManagementDto;    	
+	    }
+	 
+	 $scope.view1 = function(blockManagementDto) {
+		 console.log(JSON.stringify(blockManagementDto));
+	    	$("#myModal1").modal('show');
+	    	$scope.blockManagementDetails = blockManagementDto;    	
+	    }
+	
+	
+	$scope.dtOptions = DTOptionsBuilder.newOptions()
+    .withDOM('<"top"lrf><"bottom"tip>').withLanguage({"sEmptyTable":"No Record Found"})
+    .withButtons([            
+    	{extend: 'excel',
+        exportOptions: {
+           columns: ':visible:not(.not-export-col)'
+        }
+    	},
+    	{
+    	extend:'colvis'
+    	}
+]);	
+	
+
+});

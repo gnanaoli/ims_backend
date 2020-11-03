@@ -1,0 +1,255 @@
+.default-theme {
+    background: #36578c;
+}
+.teal {
+    background: #009688;
+}
+.bluegrey{
+	background: #607D8B;
+}
+.indigo{
+	background:#3F51B5;
+}
+.pink{
+	background:#b34c6f;
+}
+.fix-header .topbar {
+	border-bottom: 2px solid #607D8B;
+}
+.fix-sidebar .left-sidebar {
+    background: #607D8B;
+}
+.notify .heartbit {
+    border-color:#607D8B;
+}
+.fix-sidebar .left-sidebar {
+    background: #607D8B;
+}
+.footer {
+	background: #607D8B;
+}
+.topbar .navbar-light .navbar-nav .nav-item>a.nav-link {
+	color: #607D8B;
+}
+.topbar .navbar-light .navbar-nav .nav-item>a.nav-link i {
+	color: #607D8B;
+}
+.top-header {
+	color: #607D8B;
+}
+.header-name h3 {
+	color: #607D8B;
+}
+.fix-sidebar .left-sidebar {
+    background: #607D8B;
+}
+.mini-sidebar .sidebar-nav #sidebarnav>li:hover>a {
+	border-right-color:#607D8B;
+}
+.mini-sidebar .sidebar-nav ul li ul li:hover {
+	border-right-color:#607D8B;
+}
+.text-themecolor {
+	color: #607D8B !important;
+}
+.mini-sidebar .sidebar-nav #sidebarnav>li>ul {
+	background: #607D8B;
+}
+.sidebar-nav ul li ul li a {
+    background: #3c56636b;
+}
+.sidebar-nav ul li a:hover {
+    border-right-color: #607D8B !important;
+}
+/* .select2-results__option[aria-selected] {
+	color: #607D8B;
+} */
+.tooltip.bs-tooltip-left .arrow:before {
+	border-left-color: #607D8B !important;
+  }
+   .form_section .three_column_form h3 {
+    color: #607D8B;
+}
+.select-items div,.select-selected {
+	color: #607D8B;
+  }
+  .search_section .search_heading span{
+	color: #607D8B;
+}
+.search_section .search_btn {
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#94bcd0), to(#607D8B));
+}
+.search_section .search_btn:hover {
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#607D8B), to(#94bcd0));
+}
+.search_section .search_heading span{
+	color: #607D8B;
+}
+
+.btn-circle.right-side-toggle {
+    background: #607D8B;
+}
+.buttom-side-toggle{
+	background: #607D8B;
+}
+.bottom-sidebar h2{
+    background: #607D8B;
+}
+.right-sidebar .rpanel-title {
+    background: #607D8B;
+}
+.form_section {
+	border-color:#3c5663;
+	color: #000;
+}
+.form_content_title {
+	background-color: #3c5663!important;
+}
+table.dataTable thead {
+	background-color: #3c5663;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:active {
+	background-color: #3c5663 !important;
+	background: #3c5663 !important;
+}
+.paging_simple_numbers .pagination .paginate_button.active {
+	background: #3c5663;
+	border-color: #3c5663;
+}
+.paging_simple_numbers .pagination .paginate_button.active a,
+	.paging_simple_numbers .pagination .paginate_button:hover a {
+	background: #3c5663;
+}
+.paging_simple_numbers .pagination .paginate_button:hover {
+	background: #3c5663;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover,
+	.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:active
+	{
+	background: #3c5663;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+	border-color:#3c5663;
+}
+.form_section .form-inline .input-group.date .inner-addon .fa {
+	color: #3c5663;
+}
+.form_section .form-inline .new-radio-button [type="radio"]:checked+label::after,
+	[type="radio"].with-gap:checked+label::after {
+		border-color:#3c5663;
+}
+
+.form_section .form-inline .new-radio-button [type="radio"]:checked+label::after,
+	[type="radio"].with-gap:checked+label::before, [type="radio"].with-gap:checked+label::after
+	{
+	border-color:#3c5663;
+}
+.mini-sidebar .sidebar-nav #sidebarnav>li:hover>a {
+	background: #3c5663;
+}
+.mini-sidebar .sidebar-nav ul li ul li:hover a {
+	background: #3c5663;
+}
+.mini-sidebar .sidebar-nav ul li ul li:hover a {
+	background: #3c5663;
+}
+.sidebar-nav>ul>li>a.active {
+	background: #3c5663;
+}
+.sidebar-nav ul li a:hover {
+	background: #3c5663;
+}
+.sidebar-nav>ul>li.active>a {
+	background: #3c5663;
+}
+.sidebar-nav>ul>li>ul>li.active a {
+	background: #3c5663;
+}
+.sidebar-nav ul li ul li a:hover {
+	background: #3c5663;
+}
+.submit_col .btn-primary, .submit_col .btn-primary.disabled {
+	background: #3c5663;
+	border-color:#3c5663;
+}
+.submit_col .btn-primary:hover, .submit_col .btn-primary.disabled:hover
+	{
+	background: #3c5663;
+	border-color:#3c5663;
+}
+[type="checkbox"].filled-in:not :checked+label:after {
+	border-color:#3c5663;
+}
+
+[type="radio"]:not :checked+label:before, [type="radio"]:not :checked
+	+label:after {
+	border-color:#3c5663;
+}
+.form_section .form-inline .new-radio-button [type="radio"]:checked+label::after, [type="radio"].with-gap:checked+label::before, [type="radio"].with-gap:checked+label::after {
+    border-color: #3c5663;
+}
+
+.form_section .form-inline .new-radio-button [type="radio"]:checked+label::after, [type="radio"].with-gap:checked+label::after {
+    background-color: #3c5663;
+}
+.form_section .form-inline [type="checkbox"].filled-in:checked+label:after
+	{
+	border-color:#3c5663;
+	background-color: #3c5663;
+	}
+	.form_section .form-inline input {
+	border-color:#3c5663;
+}
+.form_section .three_column_form .three_column_form_column .input-group.date {
+	border-color:#3c5663;
+}
+.form_section .form-inline select {
+	border-color:#3c5663;
+}
+.form_section .form-inline .input-group.date .inner-addon .fa {
+	color: #3c5663;
+}
+
+/* =================================== */
+.sidebar-nav ul li a {
+    color: #f0f6ff;
+}
+.sidebar-nav>ul>li>a i {
+	color: #f0f6ff;
+}
+table.table-bordered.dataTable tbody tr:nth-of-type(odd) {
+	background: #3c566326;
+}
+table.table-bordered.dataTable tbody tr:nth-of-type(even) {
+		background: #3c56634d;
+}
+.btn-inverse, .btn-inverse.disabled {
+    background: #0057a7;
+    border-color: #0057a7;
+}
+.btn-inverse:hover, .btn-inverse.disabled:hover {
+	background: #0057a7d1;
+    border-color: #0057a7d1;
+}
+.single_select_box>.bootstrap-select>.dropdown-toggle {
+    border-color: #3c5663;
+}
+.single_select_box>.select_box_two>.bootstrap-select>.dropdown-toggle {
+	border-color: #3c5663;
+}
+.select2-container--default .select2-selection--single {
+	border-color: #3c5663!important;
+}
+.form_section .form-inline .input-group.date {
+	border-color: #3c5663;
+}
+.select2-dropdown {
+    border-color: #3c5663 !important;
+}
+.sidebar-nav>ul>li.active>a {
+	border-color: #7ea3b5;
+    border-right-color: #607D8B;
+}
+.dt-buttons .dt-button {
+        background: #3c5663!important;
+}

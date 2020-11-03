@@ -1,0 +1,823 @@
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+	pageEncoding="ISO-8859-1"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="security"
+	uri="http://www.springframework.org/security/tags"%>
+<%@ page isELIgnored="false"%>
+<jsp:include page="header.jsp" />
+
+
+
+<!-- Container fluid  -->
+<!-- ============================================================== -->
+<div class="container-fluid user-top"
+	data-ng-controller="projectManagementController">
+	<!-- ============================================================== -->
+	<!-- Bread crumb and right sidebar toggle -->
+	<!-- ============================================================== -->
+	<div class="row page-titles">
+		<div class="col-md-5 align-self-center">
+			<h3 class="text-themecolor">PROJECT</h3>
+		</div>
+		<security:authorize access="hasAuthority('OFFICE ADMINISTRATOR')">
+			<div class="col-md-7 align-self-center">
+				<ol class="breadcrumb">
+					<div data-ng-if="projectTable">
+						<a class="btn btn-primary waves-effect waves-light" href=""
+							data-ng-click="addProject()">Add Project</a>
+					</div>
+				</ol>
+			</div>
+		</security:authorize>
+	</div>
+	<!-- ============================================================== -->
+	<!-- End Bread crumb and right sidebar toggle -->
+	<!-- ============================================================== -->
+	<!-- ============================================================== -->
+	<!-- Start Page Content -->
+	<!-- ============================================================== -->
+	<!-- Row -->
+	<div data-ng-if="projectTable">
+		<div class="form_section">
+
+			<div class="form-content">
+				<h4 class="form_content_title">Search Projects</h4>
+
+				<div class="table-responsive">
+					<table datatable="ng" dt-options="dtOptions"
+						class="table table-striped table-bordered">
+						<thead>
+							<tr>
+								<th>Project Name</th>
+								<th>State</th>
+								<th>City</th>
+								<th>project in charge</th>
+								<th>Start Date</th>
+								<th>End Date</th>
+								<th>Status</th>
+								<th class="not-export-col">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr data-ng-repeat="projectDto in projectDtoList">
+								<td>{{projectDto.name}}</td>
+								<td>{{projectDto.state}}</td>
+								<td>{{projectDto.city}}</td>
+								<td>{{projectDto.projectInCharge}}</td>
+								<td>{{projectDto.startDate}}</td>
+								<td>{{projectDto.endDate}}</td>
+								<td>{{projectDto.status}}</td>
+								<td class="table_btn_group"><security:authorize
+										access="hasAuthority('OFFICE ADMINISTRATOR')">
+										<a href="" data-ng-click="edit(projectDto)"
+											class="btn btn-primary"><i class="fa fa-edit"></i> Edit</a>
+									</security:authorize> <a href="" data-ng-click="view(projectDto)"
+									class="btn btn-primary"><i class="fa fa-drivers-license-o"></i>
+										View</a></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+	<!-- Modal -->
+	<div class="modal fade" id="myModal" role="dialog">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Project Details</h4>
+				</div>
+				<div class="modal-body">
+					<table class="table table-bordered table-striped">
+						<tr>
+							<th>Poject Name</th>
+							<td>{{projectDetails.name}}</td>
+						</tr>
+						<tr>
+							<th>State</th>
+							<td>{{projectDetails.state}}</td>
+						</tr>
+						<tr>
+							<th>City</th>
+							<td>{{projectDetails.city}}</td>
+						</tr>
+						<tr>
+							<th>Project In Charge</th>
+							<td>{{projectDetails.projectInCharge}}</td>
+						</tr>
+						<tr>
+							<th>Start Date</th>
+							<td>{{projectDetails.startDate}}</td>
+						</tr>
+						<tr>
+							<th>End Date</th>
+							<td>{{projectDetails.endDate}}</td>
+						</tr>
+						<tr>
+							<th>Status</th>
+							<td>{{projectDetails.status}}</td>
+						</tr>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+	<!-- Start Page Content -->
+	<!-- ============================================================== -->
+	<!-- Row -->
+	<div data-ng-if="newProject">
+		<div class="form_section">
+			<div class="form-content create_form">
+				<h4 class="form_content_title">New Project</h4>
+				<form class="form-inline" role="form" name="new_project"
+					id="new_project" data-ng-submit="saveProject(new_project.$valid)"
+					novalidate>
+					<div class="row">
+						<div class="col-md-6 col_md text-center">
+
+							<div class="add_icon_asterisk">
+								<label for="pwd">Project Name:</label> <input type="text"
+									class="form-control" id="name" name="name" namefield
+									data-ng-model="projectDto.name" maxlength="50"
+									required="required" class="error_msg" autocomplete="off"
+									tabindex="1"> <i class="fa fa-asterisk"></i>
+							</div>
+							<div
+								data-ng-show="new_project.$submitted || new_project.name.$touched"
+								class="error_msg">
+								<div data-ng-show="new_project.name.$error.required"
+									class="error_msg">Please Enter Project Name</div>
+							</div>
+							<div class="">
+								<label for="pwd">In Charge Name:</label> <input type="text"
+									class="form-control" id="projectInCharge"
+									name="projectInCharge"
+									data-ng-model="projectDto.projectInCharge" maxlength="100"
+									namefield class="error_msg" autocomplete="off" tabindex="2">
+								<!-- <i class="fa fa-asterisk" ></i> -->
+							</div>
+							<!-- <div data-ng-show="new_project.$submitted || new_project.projectInCharge.$touched" class="error_msg">
+									<div data-ng-show="new_project.projectInCharge.$error.required" class="error_msg">Please Enter Project In Charge </div>
+									</div> -->
+
+							<div class="add_icon_asterisk">
+								<label for="email">Project Type</label>
+
+								<div class="new-select-option">
+									<select name="projectType" id="" wb-select2
+										data-ng-model="projectDto.projectType" required
+										class="form-control" style="width: 100%; height: 36px;"
+										tabindex="3">
+
+										<option></option>
+										<option
+											data-ng-repeat="x in projectTypeDtoList track by x.projectType"
+											value="{{x.projectType}}">{{x.projectType}}</option>
+
+									</select> <i class="fa fa-asterisk"></i>
+								</div>
+							</div>
+
+							<div
+								data-ng-show="new_project.$submitted || new_project.projectType.$touched"
+								class="error_msg">
+								<div data-ng-show="new_project.projectType.$error.required"
+									class="error_msg">Please enter project Type</div>
+							</div>
+
+							<div class="add_icon_asterisk">
+								<label for="pwd">Start Date:</label>
+
+
+								<div class="input-group date" data-date-format="dd/mm/yyyy"
+									data-date-end-date="0d" data-date-today-highlight="true"
+									data-date-autoclose="true" data-provide="datepicker">
+									<div class="input-group-addon inner-addon right-addon ">
+										<i class="fa fa-calendar"></i> <input type="text"
+											class="form-control" placeholder="" name="startDate"
+											id="startDate" data-ng-model="projectDto.startDate" readonly
+											required tabindex="4" data-ng-change="validateEndDate()">
+
+									</div>
+								</div>
+								<i class="fa fa-asterisk"></i>
+
+
+							</div>
+							<div
+								data-ng-show="new_project.$submitted || new_project.startDate.$touched"
+								class="error_msg">
+								<div data-ng-show="new_project.startDate.$error.required"
+									class="error_msg">Please Select Start Date</div>
+							</div>
+							<div class="add_icon_asterisk">
+								<label for="pwd">End Date:</label>
+
+
+								<div class="input-group date" data-date-format="dd/mm/yyyy"
+									data-date-today-highlight="true" data-date-autoclose="true"
+									data-provide="datepicker">
+									<div class="input-group-addon inner-addon right-addon ">
+										<i class="fa fa-calendar"></i> <input type="text"
+											class="form-control" placeholder="" name="endDate"
+											id="endDate" data-ng-model="projectDto.endDate" readonly
+											required tabindex="5" data-ng-change="validateEndDate()">
+
+									</div>
+								</div>
+								<i class="fa fa-asterisk"></i>
+
+
+							</div>
+							<div
+								data-ng-show="new_project.$submitted || new_project.endDate.$touched"
+								class="error_msg">
+								<div data-ng-show="new_project.endDate.$error.required"
+									class="error_msg">Please Select End Date</div>
+							</div>
+
+
+
+							<div class="add_icon_asterisk">
+								<label for="pwd">Address 1 :</label> <input type="text"
+									class="form-control" id="address1" name="address1"
+									data-ng-model="projectDto.address1" maxlength="50"
+									required="required" class="error_msg" tabindex="6"> <i
+									class="fa fa-asterisk"></i>
+							</div>
+							<div
+								data-ng-show="new_project.$submitted || new_project.address1.$touched"
+								class="error_msg">
+								<div data-ng-show="new_project.address1.$error.required"
+									class="error_msg">Please enter Address1</div>
+							</div>
+
+
+							<div class="">
+								<label for="pwd"> Address 2:</label> <input type="text"
+									class="form-control" id="address2" name="address2"
+									data-ng-model="projectDto.address2" maxlength="50" tabindex="7">
+							</div>
+						</div>
+						<div class="col-md-6 col_md text-center">
+
+
+
+							<div class="">
+								<label for="pwd"> Address 3:</label> <input type="text"
+									class="form-control" id="address3" name="address3"
+									data-ng-model="projectDto.address3" maxlength="50" tabindex="8">
+							</div>
+
+
+							<div class="">
+								<label for="pwd"> Area / Landmark:</label> <input type="text"
+									class="form-control" id="areaLandmark" name="areaLandmark"
+									data-ng-model="projectDto.areaLandmark" maxlength="50"
+									tabindex="9">
+							</div>
+
+							<!-- <div class="add_icon_asterisk">
+											<label for="pwd">Country Name</label>
+											
+										<div class="new-select-option">
+								<select name="country" id="" wb-select2
+									data-ng-model="projectDto.countryName"
+									data-ng-change="getStates(projectDto.countryName)"
+									required class="form-control"
+									style="width: 100%; height: 36px;" tabindex="10">
+
+									<option value="" selected>--- SELECT COUNTRY ---</option>
+
+									<option
+										data-ng-repeat="x in countryDtoList track by x.countryName"
+										value="{{x.countryName}}">{{x.countryName}}</option>
+
+								</select>
+								<i class="fa fa-asterisk" ></i>
+							</div>
+										</div>
+										<div data-ng-if="isInValidCountry==true && projectDto.country.toString().length >0" >Please choose valid Country</div>
+									<div data-ng-show="new_project.$submitted || new_project.country.$touched" class="error_msg">
+									<div data-ng-show="new_project.country.$error.required" class="error_msg">Please Select Country Name</div>
+								</div> -->
+
+
+
+							<div class="add_icon_asterisk">
+								<label for="pwd">State</label>
+
+
+								<div class="new-select-option">
+									<select name="state" id="state1" wb-select2
+										data-ng-model="projectDto.state"
+										data-ng-change="getCity(projectDto.state,projectDto.countryName)"
+										required class="form-control"
+										style="width: 100%; height: 36px;" tabindex="11">
+
+										<option value="" selected>--- SELECT STATE ---</option>
+
+										<option
+											data-ng-repeat="x in stateEntityList track by x.stateName"
+											value="{{x.stateName}}">{{x.stateName}}</option>
+
+									</select> <i class="fa fa-asterisk"></i>
+								</div>
+
+							</div>
+							<div
+								data-ng-show="new_project.$submitted ||new_project.state.$touched"
+								class="error_msg">
+								<div data-ng-show="new_project.state.$error.required"
+									class="error_msg">Please Select State</div>
+							</div>
+
+							<div class="add_icon_asterisk">
+								<label for="pwd">City Name</label>
+								<!-- <input
+											list="city" class="form-control" 
+											id="city_List" name="city" placeholder="" data-ng-readonly="datareadonly" required
+											data-ng-model="projectDto.city" autocomplete="off" tabindex="12">
+											<i class="fa fa-asterisk" ></i>
+										<datalist id="city">
+											<option
+												data-ng-repeat="x in cityEntityList track by x.cityName"
+												value="{{x.cityName}}">{{x.cityName}}</option>
+										</datalist> -->
+								<!-- <div class="add_icon_asterisk">
+						<label for="pwd">City Name</label> -->
+
+								<div class="new-select-option">
+									<select name="city" id="city" wb-select2
+										data-ng-model="projectDto.city" required class="form-control"
+										style="width: 100%; height: 36px;" tabindex="12">
+
+										<option value="" selected>--- SELECT CITY ---</option>
+
+										<option
+											data-ng-repeat="x in cityEntityList track by x.cityName"
+											value="{{x.cityName}}">{{x.cityName}}</option>
+
+									</select> <i class="fa fa-asterisk"></i>
+								</div>
+
+							</div>
+							<div
+								data-ng-show="new_project.$submitted || new_project.city.$touched"
+								class="error_msg">
+								<div data-ng-show="new_project.city.$error.required"
+									class="error_msg">Please Select City</div>
+							</div>
+
+
+
+							<div class="add_icon_asterisk">
+								<label for="email">Pin Code:</label> <input type="text"
+									class="form-control" id="pinCode" name="pinCode"
+									data-ng-model="projectDto.pinCode" required maxlength="6"
+									numbersonly tabindex="13"> <i class="fa fa-asterisk"></i>
+							</div>
+							<div
+								data-ng-show="new_project.$submitted || new_project.pinCode.$touched"
+								class="error_msg">
+								<div data-ng-show="new_project.pinCode.$error.required"
+									class="error_msg">Please enter Pin code</div>
+								<div data-ng-show="new_project.pinCode.toString().length<7">Please
+									enter Valid 6 digit Pin Code</div>
+							</div>
+
+							<div class="add_icon_asterisk">
+								<label for="email">Status </label>
+
+
+
+								<div class="new-select-option">
+									<select name="status" id="status" wb-select2
+										data-ng-model="projectDto.status" required
+										class="form-control" style="width: 100%; height: 36px;"
+										tabindex="14">
+
+										<option value="" selected>--- SELECT CITY ---</option>
+
+										<option
+											data-ng-repeat="x in projectStatusDtoList track by x.status"
+											value="{{x.status}}">{{x.status}}</option>
+
+									</select> <i class="fa fa-asterisk"></i>
+								</div>
+
+							</div>
+
+							<div
+								data-ng-show="new_project.$submitted || new_project.status.$touched"
+								class="error_msg">
+								<div data-ng-show="new_project.status.$error.required"
+									class="error_msg">Please Select Status</div>
+
+							</div>
+
+						</div>
+						<div class="col-12 submit_col text-center">
+							<button class="btn btn-primary" data-ng-click="saveProject()">
+								<i class="fa fa-check"></i> SAVE
+							</button>
+							<span class="btn btn-warning" data-ng-click="cancel()"><i
+								class="fa fa-close"></i> CANCEL</span>
+						</div>
+					</div>
+				</form>
+			</div>
+
+		</div>
+	</div>
+
+	<!-- Row -->
+	<!-- ============================================================== -->
+
+	<!-- Row -->
+	<!-- ============================================================== -->
+	<!-- Start Page Content -->
+	<!-- ============================================================== -->
+	<!-- Row -->
+	<div data-ng-if="editProject">
+		<div class="form_section">
+			<div class="form-content create_form">
+				<h4 class="form_content_title">Edit Project</h4>
+				<form class="form-inline" role="form" name="edit_project"
+					id="edit_project" data-ng-submit="saveProject(edit_project.$valid)"
+					novalidate>
+					<div class="row">
+						<div class="col-md-6 col_md text-center">
+
+							<input type="hidden" class="form-control" id="id" name="id"
+								data-ng-model="projectDto.id">
+							<div class="add_icon_asterisk">
+								<label for="pwd">Project Name:</label> <input type="text"
+									class="form-control" id="name" name="name"
+									data-ng-model="projectDto.name" maxlength="50"
+									required="required" autocomplete="off" tabindex="1"> <i
+									class="fa fa-asterisk"></i>
+							</div>
+							<div
+								data-ng-show="edit_project.$submitted || edit_project.name.$touched"
+								class="error_msg">
+								<div data-ng-show="edit_project.name.$error.required"
+									class="error_msg">Please Enter Project Name</div>
+							</div>
+
+							<div class="add_icon_asterisk">
+								<label for="email">Project Type</label>
+								<%-- <input
+											list="projectType" class="form-control" 
+											id="projectType_List" placeholder="Project Type" data-data-ng-readonly="datareadonly"	data-ng-model="projectDto.projectType" name="projectType" data-ng-init="projectDto.projectType='${projectDto.projectType}'"  required autocomplete="off" tabindex="2" >
+											<i class="fa fa-asterisk" ></i>
+										<datalist id="projectType">
+											<option
+												data-data-ng-repeat="x in projectTypeDtoList track by x.projectType"
+												value="{{x.projectType}}">{{x.projectType}}</option>
+										</datalist> --%>
+								<div class="new-select-option">
+									<select name="projectType" id="" wb-select2
+										data-ng-model="projectDto.projectType" required
+										class="form-control" style="width: 100%; height: 36px;"
+										tabindex="2">
+
+										<option value=""></option>
+										<option
+											data-ng-repeat="x in projectTypeDtoList track by x.projectType"
+											value="{{x.projectType}}">{{x.projectType}}</option>
+
+									</select> <i class="fa fa-asterisk"></i>
+								</div>
+							</div>
+
+
+							<div
+								data-ng-show="edit_project.$submitted || edit_project.projectType.$touched"
+								class="error_msg">
+								<div data-ng-show="edit_project.projectType.$error.required"
+									class="error_msg">Please enter project Type</div>
+							</div>
+
+							<div class="">
+								<label for="pwd">In charge Name:</label> <input type="text"
+									class="form-control" id="projectInCharge"
+									name="projectInCharge"
+									data-ng-model="projectDto.projectInCharge" autocomplete="off"
+									tabindex="3">
+								<!-- <i class="fa fa-asterisk" ></i> -->
+							</div>
+
+							<!-- <div data-ng-show="edit_project.$submitted || edit_project.projectInCharge.$touched" class="error_msg">
+									<div data-ng-show="edit_project.projectInCharge.$error.required" class="error_msg">Please Enter Project In Charge </div>
+									</div> -->
+							<div class="add_icon_asterisk">
+								<label for="pwd">Start Date:</label>
+
+								<div class="input-group date" data-date-format="dd/mm/yyyy"
+									data-date-today-highlight="true" data-date-autoclose="true"
+									data-provide="datepicker">
+									<div class="input-group-addon inner-addon right-addon ">
+										<i class="fa fa-calendar"></i> <input type="text"
+											class="form-control" placeholder="" name="startDate"
+											id="startDate" data-ng-model="projectDto.startDate"
+											data-ng-change="validateEndDate()" readonly required
+											autocomplete="off" tabindex="4">
+
+									</div>
+									<div
+										data-ng-show="edit_project.$submitted || edit_project.startDate.$touched"
+										class="error_msg">
+										<div data-ng-show="edit_project.startDate.$error.required"
+											class="error_msg">Please Select Start Date</div>
+									</div>
+								</div>
+								<i class="fa fa-asterisk"></i>
+							</div>
+							<div class="add_icon_asterisk">
+								<label for="pwd">EndtDate:</label>
+
+
+								<div class="input-group date" data-date-format="dd/mm/yyyy"
+									data-date-today-highlight="true" data-date-autoclose="true"
+									data-provide="datepicker">
+									<div class="input-group-addon inner-addon right-addon ">
+										<i class="fa fa-calendar"></i> <input type="text"
+											class="form-control" placeholder="" name="endDate"
+											id="endDate" data-ng-model="projectDto.endDate"
+											data-ng-change="validateEndDate()" readonly required
+											autocomplete="off" tabindex="5">
+
+									</div>
+								</div>
+
+
+								<div
+									data-ng-show="edit_project.$submitted || edit_project.endDate.$touched"
+									class="error_msg">
+									<div data-ng-show="edit_project.endDate.$error.required"
+										class="error_msg">Please Select End Date</div>
+								</div>
+
+								<i class="fa fa-asterisk"></i>
+							</div>
+
+
+							<div class="add_icon_asterisk">
+								<label for="pwd">Address 1 :</label> <input type="text"
+									class="form-control" id="address1" name="address1"
+									data-ng-model="projectDto.address1" required="required"
+									autocomplete="off" tabindex="6"> <i
+									class="fa fa-asterisk"></i>
+							</div>
+
+							<div
+								data-ng-show="edit_project.$submitted || edit_project.address1.$touched"
+								class="error_msg">
+								<div data-ng-show="edit_project.address1.$error.required"
+									class="error_msg">Please enter Address1</div>
+							</div>
+
+
+
+							<div class="">
+								<label for="pwd"> Address 2:</label> <input type="text"
+									class="form-control" id="address2" name="address2"
+									data-ng-model="projectDto.address2" autocomplete="off"
+									tabindex="7">
+							</div>
+						</div>
+						<div class="col-md-6 col_md text-center">
+
+							<div class="">
+								<label for="pwd"> Address 3:</label> <input type="text"
+									class="form-control" id="address3" name="address3"
+									data-ng-model="projectDto.address3" autocomplete="off"
+									tabindex="8">
+							</div>
+
+							<div class="">
+								<label for="pwd"> Area / Landmark:</label> <input type="text"
+									class="form-control" id="areaLandmark" name="areaLandmark"
+									data-ng-model="projectDto.areaLandmark" autocomplete="off"
+									tabindex="9">
+							</div>
+
+
+
+							<!-- <div class="add_icon_asterisk">
+											<label for="pwd">Country Name</label>
+											
+										<div class="new-select-option">
+								<select name="country" id="" wb-select2
+									data-ng-model="projectDto.countryName"
+									data-ng-change="getStates(projectDto.countryName)"
+									required class="form-control"
+									style="width: 100%; height: 36px;" tabindex="10">
+
+									<option value="" selected>--- SELECT COUNTRY ---</option>
+
+									<option
+										data-ng-repeat="x in countryDtoList track by x.countryName"
+										value="{{x.countryName}}">{{x.countryName}}</option>
+
+								</select>
+								<i class="fa fa-asterisk" ></i>
+							</div>
+										</div>
+										
+										<div data-ng-if="isInValidCountry==true && projectDto.country.toString().length >0" >Please choose valid Country</div>
+									<div data-ng-show="edit_project.$submitted || edit_project.country.$touched" class="error_msg">
+									<div data-ng-show="edit_project.country.$error.required" class="error_msg">Please Select Country Name</div>
+								</div> -->
+
+
+							<div class="add_icon_asterisk">
+								<label for="pwd">State</label>
+								<%-- <input
+											list="state" class="form-control" 
+											id="state_List" name="state" placeholder="state Name" data-ng-readonly="datareadonly" required
+											data-ng-model="projectDto.state" data-ng-blur="getCity(projectDto.state,projectDto.country)" data-ng-init="projectDto.state='${projectDto.state}'" autocomplete="off" tabindex="11">
+											<i class="fa fa-asterisk" ></i>
+										<datalist id="state">
+											<option
+												data-ng-repeat="x in stateEntityList track by x.stateName"
+												value="{{x.stateName}}">{{x.stateName}}</option>
+										</datalist> --%>
+								<div class="new-select-option">
+									<select name="state" id="state1" wb-select2
+										data-ng-model="projectDto.state"
+										data-ng-change="getCity(projectDto.state,projectDto.countryName)"
+										required class="form-control"
+										style="width: 100%; height: 36px;" tabindex="11">
+
+										<option value="" selected>--- SELECT STATE ---</option>
+
+										<option
+											data-ng-repeat="x in stateEntityList track by x.stateName"
+											value="{{x.stateName}}">{{x.stateName}}</option>
+
+									</select> <i class="fa fa-asterisk"></i>
+								</div>
+							</div>
+
+							<div
+								data-ng-show="edit_project.$submitted ||edit_project.state.$touched"
+								class="error_msg">
+								<div data-ng-show="edit_project.state.$error.required"
+									class="error_msg">Please Select State</div>
+							</div>
+
+							<div class="add_icon_asterisk">
+								<label for="pwd">City Name</label>
+								<%-- <input
+											list="city" class="form-control" 
+											id="city_List" name="city" placeholder="City Name" data-ng-readonly="datareadonly" required
+											data-ng-model="projectDto.city" data-ng-init="projectDto.city='${projectDto.city}'" autocomplete="off" tabindex="12">
+											<i class="fa fa-asterisk" ></i>
+										<datalist id="city">
+											<option
+												data-ng-repeat="x in cityEntityList track by x.cityName"
+												value="{{x.cityName}}">{{x.cityName}}</option>
+										</datalist> --%>
+
+
+								<div class="new-select-option">
+									<select name="city" id="city" wb-select2
+										data-ng-model="projectDto.city" required class="form-control"
+										style="width: 100%; height: 36px;" tabindex="12">
+
+										<option value="" selected>--- SELECT CITY ---</option>
+
+										<option
+											data-ng-repeat="x in cityEntityList track by x.cityName"
+											value="{{x.cityName}}">{{x.cityName}}</option>
+
+									</select> <i class="fa fa-asterisk"></i>
+								</div>
+
+							</div>
+
+							<div
+								data-ng-show="edit_project.$submitted || edit_project.city.$touched"
+								class="error_msg">
+								<div data-ng-show="edit_project.city.$error.required"
+									class="error_msg">Please Select City</div>
+							</div>
+							<div class="add_icon_asterisk">
+								<label for="email">Pin Code:</label> <input type="text"
+									class="form-control" id="pinCode" name="pinCode"
+									data-ng-model="projectDto.pinCode" required="required"
+									autocomplete="off" tabindex="13"> <i
+									class="fa fa-asterisk"></i>
+							</div>
+							<div
+								data-ng-show="edit_project.$submitted || edit_project.pinCode.$touched"
+								class="error_msg">
+								<div data-ng-show="edit_project.pinCode.$error.required"
+									class="error_msg">Please enter Pin code</div>
+								<div data-ng-show="edit_project.pinCode.toString().length<7">Please
+									enter Valid 6 digit Pin Code</div>
+							</div>
+							<%-- <div class="add_icon_asterisk">
+											<label for="email">Status </label>
+											<input list="status" class="form-control" 
+											id="projectStatus_List" placeholder="Status" data-ng-readonly required data-ng-model="projectDto.status" name="status" data-ng-init="projectDto.status='${projectDto.status}'" autocomplete="off" tabindex="14">
+											<i class="fa fa-asterisk" ></i>
+										<datalist id="status">
+											<option
+												data-data-ng-repeat="x in projectStatusDtoList track by x.status"
+												value="{{x.status}}">{{x.status}}</option>
+										</datalist>
+										</div> --%>
+
+							<!-- 
+										<div data-ng-show="edit_project.$submitted || edit_project.status.$touched" class="error_msg">
+									<div data-ng-show="edit_project.status.$error.required" class="error_msg">Please Select  Status</div>
+							
+									</div> -->
+
+							<%-- <div class="add_icon_asterisk">
+											<label for="email">Status </label>
+											<input list="status" class="form-control" id="projectStatus_List" placeholder="Status" data-ng-readonly="datareadonly" required
+											data-ng-model="projectDto.status" data-ng-init="projectDto.status='${projectDto.status}'" name="status" tabindex="14">
+											<i class="fa fa-asterisk" ></i>
+										<datalist id="status">
+											<option
+												data-ng-repeat="x in projectStatusDtoList track by x.status"
+												value="{{x.status}}">{{x.status}}</option>
+										</datalist>
+										</div> --%>
+							<div class="add_icon_asterisk">
+								<label for="email">Status </label>
+								<div class="new-select-option">
+									<select name="status" id="status" wb-select2
+										data-ng-model="projectDto.status" required
+										class="form-control" style="width: 100%; height: 36px;"
+										tabindex="14">
+
+										<option value="" selected>--- SELECT CITY ---</option>
+
+										<option
+											data-ng-repeat="x in projectStatusDtoList track by x.status"
+											value="{{x.status}}">{{x.status}}</option>
+
+									</select> <i class="fa fa-asterisk"></i>
+								</div>
+							</div>
+
+							<div
+								data-ng-show="edit_project.$submitted || edit_project.status.$touched"
+								class="error_msg">
+								<div data-ng-show="edit_project.status.$error.required"
+									class="error_msg">Please Select Status</div>
+
+							</div>
+						</div>
+
+
+
+						<!-- <label for="pwd">createdBy  :</label> -->
+						<%-- <input type="hidden" class="form-control" id="createdBy" name="createdBy" data-ng-model="projectDto.createdBy" data-ng-init="projectDto.createdBy='${projectDto.createdBy}'">
+												<input type="hidden" class="form-control" id="creationDate" name="creationDate" data-ng-model="projectDto.creationDate" data-ng-init="projectDto.creationDate='${projectDto.creationDate}'"> --%>
+
+
+
+
+						<div class="col-12 submit_col text-center">
+							<button class="btn btn-primary" data-ng-click="saveProject()">
+								<i class="fa fa-check"></i> SAVE
+							</button>
+							<button class="btn btn-warning" data-ng-click="cancel()">
+								<i class="fa fa-close"></i> CANCEL
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Row -->
+<!-- ============================================================== -->
+
+
+
+
+
+
+
+<jsp:include page="footer.jsp" />

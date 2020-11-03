@@ -1,0 +1,408 @@
+.notify .point {
+	width: auto;
+	text-align: center;
+	padding: 0px 6px;
+}
+
+.form_section .form-inline .delivery_challan td {
+	padding: 5px;
+}
+
+.form_section .form-inline .delivery_challan th {
+	border-bottom: 1px solid #eee;
+}
+
+.form_section .form-inline .delivery_challan .form-control {
+	margin: 0px;
+	width: 100%;
+	border-radius: 0px;
+	border-color: #d2d2d2;
+}
+
+#vehicleCheckBox input {
+	float: left;
+	width: 23%;
+	margin: 0px 1px;
+}
+
+#vehicleCheckBox:after {
+	clear: both;
+	dispaly: rtable;
+	content: ""
+}
+
+#vehicleCheckBox:before {
+	dispaly: rtable;
+	content: ""
+}
+
+#vehicleCheckBox {
+	Width: 100%
+}
+
+.form_section .form-inline .delivery_challan .input-group.date {
+	margin: 0px;
+	width: 100%;
+	border-radius: 0px;
+	border-color: #d2d2d2;
+}
+
+.text_box {
+	width: 60% !important;
+	border-radius: 0px !important;
+	border-color: #d2d2d2 !important;
+}
+
+.inline-btn {
+	vertical-align: initial;
+	border-radius: 0px;
+	padding: 6px 15px 6px 15px;
+}
+
+button.btn.btn-primary.inline-btn {
+	margin-top: 15px;
+}
+
+.table thead th, .table th, .table td {
+	text-transform: uppercase;
+	font-size: 12px;
+	vertical-align: middle;
+}
+
+.nab_bar_sub_heading {
+	position: absolute;
+	top: 33px;
+	right: 30px;
+	font-size: 14px;
+	font-weight: bold;
+	color: #ab3b54;
+	text-transform: capitalize;
+}
+
+.nab_bar_sub_heading1 {
+	position: absolute;
+	top: 54px;
+	right: 30px;
+	font-size: 11px;
+	font-weight: bold;
+	color: #36578c;
+	text-transform: capitalize;
+}
+
+.top_header_last {
+	margin-top: -30px !important;
+}
+
+.form_section .form-inline label {
+	text-transform: uppercase;
+}
+
+.btn {
+	text-transform: uppercase;
+	font-size: 12px;
+}
+
+.form_content_title {
+	text-transform: uppercase;
+}
+
+.form_section .form-inline .form-control {
+	/* text-transform: uppercase; */
+	/*     border-radius: 0px; */
+	/*     border-color: #c5c1c1; */
+	padding: 4px;
+}
+
+.form_section .form-inline .normalstring {
+	/*     text-transform: uppercase; */
+	/*     border-radius: 0px; */
+	/*     border-color: #c5c1c1; */
+	padding: 4px;
+}
+
+.form_section .form-inline select {
+	text-transform: uppercase;
+}
+
+.form_section .form-inline .input-group.date {
+	/* 	border-radius: 0px; */
+	/* 	border-color: #c5c1c1 !important; */
+	
+}
+
+.add_icon_asterisk .fa-asterisk {
+	font-size: 9px;
+	/*     margin-right: 9px; */
+}
+
+.error_msg {
+	font-size: 11px;
+	/*     width: 81% !important; */
+	text-transform: uppercase;
+}
+
+.form-control {
+	min-height: 0px;
+	color: #000;
+}
+
+.custom_resetpwd {
+	padding: 4px;
+}
+
+.form_section .form-inline .input-group.date .inner-addon .fa {
+	padding-top: 6px;
+}
+
+.form_section .three_column_form button .fa {
+	color: #fff;
+}
+
+.form_section .three_column_form span .fa {
+	color: #fff;
+}
+
+.form_section .form-inline .new-radio-button-inline label {
+	margin-top: 7px;
+}
+
+.delivery_challan td, th {
+	padding: 0px;
+}
+
+.delivery_challan td, th {
+	border: 1px solid #eee;
+}
+
+.form_section .form-inline .submit_col span.btn-warning {
+	color: #fff;
+	background-color: #e62638;
+	border-color: #e62638;
+}
+
+.receive_error_msg {
+	color: red;
+	font-weight: bold;
+	font-size: 12px;
+	text-transform: uppercase;
+}
+
+.form_section .form-inline label {
+	margin-top: 14px;
+	font-size: 14px;
+}
+
+.error_msg1 {
+	margin: 0 !important;
+	color: #e00f0f;
+	font-size: 13px;
+	font-weight: 500;
+	text-transform: capitalize;
+	float: right !important;
+	text-align: left;
+	width: 98% !important;
+}
+
+.error_msg_edit_emp {
+	margin: 0 !important;
+	color: #e00f0f;
+	font-size: 13px;
+	font-weight: 500;
+	text-transform: capitalize;
+	float: right !important;
+	text-align: left;
+}
+
+.table thead th, .table th {
+	border: 1px solid #eee;
+}
+
+[type="checkbox"].filled-in:not (:checked ) +label:after {
+	background-color: #fff;
+	border: 1px solid #000000;
+	top: 0px;
+}
+
+.select2-container .select2-selection--single {
+	
+}
+
+.select2-search__field {
+	text-transform: uppercase;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered
+	{
+	color: #000;
+	font-family: 'FontAwesome';
+}
+
+.form_section .three_column_form .three_column_form_column .new-select-option
+	{
+	width: 85%;
+	float: left;
+	text-align: left !important;
+	justify-content: left;
+	margin-top: 10px;
+}
+
+.dt-buttons.btn-group {
+	margin-bottom: 5px;
+}
+
+.modal-body table td {
+	font-weight: bold;
+	color: #000;
+}
+
+.modal-body table th {
+	font-weight: bold;
+	color: #000;
+}
+
+.modal-title {
+	text-transform: uppercase;
+	color: #000;
+}
+
+.fix-header .topbar {
+	z-index: 999;
+}
+
+/* checkbox */
+.dt-buttons .dt-button {
+	text-transform: uppercase;
+	border-radius: 0px
+}
+
+.dt-buttons .dt-button:before {
+	content: "\f096";
+	font: normal normal normal 14px/1 FontAwesome;
+	margin-right: 5px;
+}
+
+.dt-buttons .dt-button.active:before {
+	content: "\f14a";
+	font: normal normal normal 14px/1 FontAwesome;
+	margin-right: 5px;
+}
+
+.dt-button-collection.dropdown-menu {
+	padding: 0px;
+	max-height: 205px;
+	overflow-y: auto;
+}
+
+.dt-button-collection.dropdown-menu::-webkit-scrollbar {
+	display: none;
+}
+
+.dt-button-collection.dropdown-menu::-webkit-scrollbar {
+	width: 5px;
+	height: 8px;
+	background-color: #aaa;
+}
+
+.dt-button-collection.dropdown-menu::-webkit-scrollbar-thumb {
+	background: #000;
+}
+
+.dropdown-menu {
+	padding: 0px;
+}
+
+.mailbox .message-center {
+	height: auto;
+}
+
+.email {
+	padding: 4px;
+	text-transform: uppercase;
+}
+
+.width-100 {
+	width: 100% !important;
+}
+
+.wrimagecard {
+	margin-top: 0;
+	margin-bottom: 1.5rem;
+	text-align: left;
+	position: relative;
+	background: #fff;
+	box-shadow: 12px 15px 20px 0px rgba(46, 61, 73, 0.15);
+	border-radius: 4px;
+	transition: all 0.3s ease;
+}
+
+.wrimagecard .fa {
+	position: relative;
+	font-size: 70px;
+}
+
+.wrimagecard-topimage_header {
+	padding: 20px;
+}
+
+a.wrimagecard:hover, .wrimagecard-topimage:hover {
+	box-shadow: 2px 4px 8px 0px rgba(46, 61, 73, 0.2);
+}
+
+.wrimagecard-topimage a {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+
+.wrimagecard-topimage_title {
+	padding: 18px 9px;
+	height: auto;
+	padding-bottom: 0.75rem;
+	position: relative;
+}
+
+.wrimagecard-topimage a {
+	border-bottom: none;
+	text-decoration: none;
+	color: #525c65;
+	transition: color 0.3s ease;
+}
+
+.wrimagecard-topimage_title h4 {
+	font-size: 15px;
+	font-weight: bold;
+}
+
+.wrimagecard-topimage_title .badge {
+	font-size: 15px;
+	font-weight: bold;
+}
+
+.footer {
+	/*    z-index:1001!important; */
+	
+}
+
+.datepicker.datepicker-dropdown.dropdown-menu {
+	margin-top: 10px !important;
+	/* 	    margin-bottom: 50px!important; */
+}
+
+.assign_tools_input {
+	position: relative;
+}
+
+.add_icon_asterisk .assign_tools_input .fa-asterisk {
+	right: -24px;
+	top: -11px;
+}
+
+.fasoftwares:hover {
+	text-decoration: underline;
+	color: #FFFF00 !important;
+}
+
+.footer {
+	font-weight: 400;
+}
+}

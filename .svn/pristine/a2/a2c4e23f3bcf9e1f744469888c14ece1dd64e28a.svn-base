@@ -1,0 +1,55 @@
+ims.controller('ServiceReceiveController', function($scope, $http,
+		InsertService, FetchService, $filter, DTOptionsBuilder, $q, $location,
+		UrlConstants, $timeout) {
+
+	$scope.ShowServiceTracker = true;
+
+	function getAllServiceTracker() {
+		FetchService.getAllServiceTracker().then(function(response) {
+
+			$scope.serviceTrackerList = response.responseDtoList;
+			//console.log(JSON.stringify(response.responseDtoList));
+		});
+	}
+	getAllServiceTracker();
+
+	$scope.receive = function(data) {
+
+		$scope.serviceDto = data;
+
+		$scope.ShowServiceTracker = false;
+		$scope.editServiceTracker = true;
+	}
+
+	$scope.receiveTools = function(formVaild) {
+
+		if (formVaild) {
+			InsertService.receiveServiceTools($scope.serviceDto).then(
+					function(response) {
+
+						if (response.status == "SUCCESS") {
+							swal('Tools Received', '', 'success').then(
+									function(isConfirm) {
+										if (isConfirm) {
+											getAllServiceTracker();
+											$scope.ShowServiceTracker = true;
+											$scope.editServiceTracker = false;
+										}
+									});
+
+						} else {
+							swal('', response.exceptionMessage, 'warning');
+						}
+
+					});
+		}
+
+	}
+
+	$scope.cancel = function() {
+		getAllServiceTracker();
+		$scope.ShowServiceTracker = true;
+		$scope.editServiceTracker = false;
+	}
+
+});

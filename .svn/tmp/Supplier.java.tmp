@@ -1,0 +1,377 @@
+package com.fa.inventory.entity;
+
+import java.sql.Timestamp;
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+@Entity
+@Table(name = "supplier")
+public class Supplier {
+
+	@Id
+	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Column(name = "name", length = 100, nullable = false)
+	private String name;
+
+	@Column(name = "code", unique = true, length = 6, nullable = false)
+	private String code;
+
+	@Column(name = "country", length = 50, nullable = false)
+	private String country;
+	
+	@Column(name = "godown_country", length = 50, nullable = false)
+	private String godownCountry;
+
+	@Column(name = "godown_address_1", length = 100, nullable = false)
+	private String godownAddress1;
+
+	@Column(name = "godown_address_2", length = 50)
+	private String godownAddress2;
+
+	@Column(name = "godown_address_3", length = 50)
+	private String godownAddress3;
+
+	@Column(name = "godown_area_landmark", length = 50)
+	private String godownAreaLandmark;
+
+	@Column(name = "godown_state", length = 50, nullable = false)
+	private String godownState;
+
+	@Column(name = "godown_city", length = 50, nullable = false)
+	private String godownCity;
+
+	@Column(name = "godown_pincode", length = 6, nullable = false)
+	private Integer godownPinCode;
+	
+	@Column(name = "address_1", length = 100, nullable = false)
+	private String address1;
+
+	@Column(name = "address_2", length = 50)
+	private String address2;
+
+	@Column(name = "address_3", length = 50)
+	private String address3;
+
+	@Column(name = "area_landmark", length = 50)
+	private String areaLandmark;
+
+	@Column(name = "state", length = 50, nullable = false)
+	private String state;
+
+	@Column(name = "city", length = 50, nullable = false)
+	private String city;
+
+	@Column(name = "pincode", length = 6, nullable = false)
+	private Integer pinCode;
+
+	@Column(name = "contact_person", length = 50)
+	private String contactPerson;
+
+	@Column(name = "telephone_number", length = 15)
+	private Long telephoneNumber;
+
+	@Column(name = "mobile_number", length = 15)
+	private Long mobileNumber;
+
+	@Column(name = "fax", length = 15)
+	private Long fax;
+
+	@Column(name = "email_id", length = 90)
+	private String emailId;
+
+	@Column(name = "gst_in", length = 15)
+	private String gstin;
+
+	@Column(name = "status", length = 8, nullable = false)
+	private String status;
+
+	@Column(name = "created_by", length = 30, nullable = false)
+	private String createdBy;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "creation_date", length = 19, nullable = false)
+	private Date creation_Date;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "last_modified_date", length = 19, nullable = false)
+	private Date lastModifiedDate;
+
+	@Column(name = "last_modified_by", length = 30, nullable = false)
+	private String lastModifiedBy;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public String getAddress1() {
+		return address1;
+	}
+
+	public void setAddress1(String address1) {
+		this.address1 = address1;
+	}
+
+	public String getAddress2() {
+		return address2;
+	}
+
+	public void setAddress2(String address2) {
+		this.address2 = address2;
+	}
+
+	public String getAddress3() {
+		return address3;
+	}
+
+	public void setAddress3(String address3) {
+		this.address3 = address3;
+	}
+
+	public String getAreaLandmark() {
+		return areaLandmark;
+	}
+
+	public void setAreaLandmark(String areaLandmark) {
+		this.areaLandmark = areaLandmark;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getContactPerson() {
+		return contactPerson;
+	}
+
+	public void setContactPerson(String contactPerson) {
+		this.contactPerson = contactPerson;
+	}
+
+	public Long getTelephoneNumber() {
+		return telephoneNumber;
+	}
+
+	public void setTelephoneNumber(Long telephoneNumber) {
+		this.telephoneNumber = telephoneNumber;
+	}
+
+	public Long getMobileNumber() {
+		return mobileNumber;
+	}
+
+	public void setMobileNumber(Long mobileNumber) {
+		this.mobileNumber = mobileNumber;
+	}
+
+	
+
+	
+	public Long getFax() {
+		return fax;
+	}
+
+	public void setFax(Long fax) {
+		this.fax = fax;
+	}
+
+	public String getEmailId() {
+		return emailId;
+	}
+
+	public void setEmailId(String emailId) {
+		this.emailId = emailId;
+	}
+
+<<<<<<< .mine
+	public String getGstIn() {
+		return gstin;
+||||||| .r478
+=======
+	
+
+	public String getGstin() {
+		return gstin;
+>>>>>>> .r481
+	}
+
+<<<<<<< .mine
+	public void setGstIn(String gstin) {
+		this.gstin = gstin;
+||||||| .r478
+=======
+	public void setGstin(String gstin) {
+		this.gstin = gstin;
+>>>>>>> .r481
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public Date getCreation_Date() {
+		return creation_Date;
+	}
+
+	public void setCreation_Date(Date creation_Date) {
+		this.creation_Date = creation_Date;
+	}
+
+	public Date getLastModifiedDate() {
+		return lastModifiedDate;
+	}
+
+	public void setLastModifiedDate(Date lastModifiedDate) {
+		this.lastModifiedDate = lastModifiedDate;
+	}
+
+	public void setLastModifiedDate(Timestamp lastModifiedDate) {
+		this.lastModifiedDate = lastModifiedDate;
+	}
+
+	public String getLastModifiedBy() {
+		return lastModifiedBy;
+	}
+
+	public void setLastModifiedBy(String lastModifiedBy) {
+		this.lastModifiedBy = lastModifiedBy;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public Integer getPinCode() {
+		return pinCode;
+	}
+
+	public void setPinCode(Integer pinCode) {
+		this.pinCode = pinCode;
+	}
+
+	
+
+	public String getGodownCountry() {
+		return godownCountry;
+	}
+
+	public void setGodownCountry(String godownCountry) {
+		this.godownCountry = godownCountry;
+	}
+
+	public String getGodownAddress1() {
+		return godownAddress1;
+	}
+
+	public void setGodownAddress1(String godownAddress1) {
+		this.godownAddress1 = godownAddress1;
+	}
+
+	public String getGodownAddress2() {
+		return godownAddress2;
+	}
+
+	public void setGodownAddress2(String godownAddress2) {
+		this.godownAddress2 = godownAddress2;
+	}
+
+	public String getGodownAddress3() {
+		return godownAddress3;
+	}
+
+	public void setGodownAddress3(String godownAddress3) {
+		this.godownAddress3 = godownAddress3;
+	}
+
+	public String getGodownAreaLandmark() {
+		return godownAreaLandmark;
+	}
+
+	public void setGodownAreaLandmark(String godownAreaLandmark) {
+		this.godownAreaLandmark = godownAreaLandmark;
+	}
+
+	public String getGodownState() {
+		return godownState;
+	}
+
+	public void setGodownState(String godownState) {
+		this.godownState = godownState;
+	}
+
+	public String getGodownCity() {
+		return godownCity;
+	}
+
+	public void setGodownCity(String godownCity) {
+		this.godownCity = godownCity;
+	}
+
+	public Integer getGodownPinCode() {
+		return godownPinCode;
+	}
+
+	public void setGodownPinCode(Integer godownPinCode) {
+		this.godownPinCode = godownPinCode;
+	}
+
+	
+}
